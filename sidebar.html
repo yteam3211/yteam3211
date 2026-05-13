@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidebar Component</title>
+    <style>
+        /* Basic reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: transparent; /* Useful if embedding via iframe */
+        }
+
+        .sidebar {
+            width: 250px;
+            height: 100vh; /* Full viewport height */
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background-color: #1a252f;
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .sidebar-menu {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .sidebar-menu li {
+            border-bottom: 1px solid #34495e;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 15px 20px;
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: #34495e;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>My Menu</h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="#" target="_top">Home</a></li>
+            <li><a href="#" target="_top">Projects</a></li>
+            <li><a href="#" target="_top">About</a></li>
+            <li><a href="#" target="_top">Contact</a></li>
+        </ul>
+    </div>
+
+</body>
+</html>
