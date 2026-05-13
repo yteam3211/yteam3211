@@ -1,0 +1,11 @@
+title: Team Documentation
+description: Technical documentation and resources.
+theme: just-the-docs
+
+url: "https://yourusername.github.io"
+baseurl: "/your-repo-name" # Change this to your repo name, or leave as "" if it's a user site
+
+# Theme Settings
+color_scheme: dark
+search_enabled: true
+heading_anchors: true
