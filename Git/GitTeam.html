@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git for Teams</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #e0e0e0;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        p {
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+        }
+        a {
+            color: #4da6ff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #99ccff;
+            text-decoration: underline;
+        }
+        ul, ol {
+            display: inline-block;
+            text-align: left;
+            background-color: #1a1a1a;
+            padding: 20px 40px;
+            margin: 10px auto 30px auto;
+            border-radius: 8px;
+            border: 1px solid #333;
+            max-width: 800px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Git for Teams</h1>
+
+    <p>Before we dive into how to use Git as a team, let's look at how Git manages files.</p>
+
+    <p>Git stores files in a <strong>branching system</strong> (often visualized as a tree). It starts from a <code>main</code> or <code>master</code> branch, which serves as the stable source of truth. From there, you can create separate branches for specific tasks.</p>
+
+    <h3>Git Branching</h3>
+    <p>A Git branch's primary job is to provide a safe, isolated sandbox for your code. It allows you to work on a specific task—like building a new robot subsystem or fixing a bug—without affecting the "clean" code that you know already works.</p> 
+
+    <p>By using a branch, you can:</p>
+    <ul>
+        <li>Commit your progress regularly.</li>
+        <li>Switch back and forth between different tasks (e.g., jumping from feature development to an urgent fix).</li>
+        <li>Combine your new code with the main project only after you have verified it doesn't break anything.</li>
+    </ul>
+
+    <h3>Pull Requests (PR)</h3>
+    <p>A <strong>Pull Request</strong> is a formal proposal to merge your branch's code into the <code>main</code> branch. It acts as a <strong>review gate</strong>:</p>
+    <ul>
+        <li><strong>Notification:</strong> It notifies your teammates that your feature is ready.</li>
+        <li><strong>Transparency:</strong> It displays exactly which lines of code were changed.</li>
+        <li><strong>Collaboration:</strong> It provides a space for "code reviews," where others can check for bugs, suggest improvements, and ensure the code meets the team's standards before it is officially merged.</li>
+    </ul>
+
+    <h3>Issues</h3>
+    <p><strong>Issues</strong> are the primary way we track tasks, bugs, and feature requests.</p>
+    <ul>
+        <li><strong>Creation:</strong> You can create an issue via the "Issues" tab in the repository by clicking "New Issue."</li>
+        <li><strong>Management:</strong> You can assign issues to team members, add labels (like <code>bug</code> or <code>enhancement</code>), and update the status as you work.</li>
+        <li><strong>Resolution:</strong> Once the task is complete, the issue can be closed (resolved).</li>
+    </ul>
+
+    <h3>GitHub Projects</h3>
+    <p>We use <strong>GitHub Projects</strong> as a Kanban-style board to organize our workflow. It allows the team to see exactly what is "To Do," "In Progress," and "Done" by linking directly to the Issues and Pull Requests mentioned above.</p>
+
+</body>
+</html>
