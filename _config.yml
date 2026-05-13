@@ -1,8 +1,0 @@
-# Inside _config.yml
-sidebar_links:
-  - title: Home
-    url: /index.html
-  - title: Projects
-    url: /projects/
-  - title: About
-    url: /about/
