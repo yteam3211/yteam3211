@@ -7,7 +7,7 @@ color_scheme: dark
 # YOUR SIDEBAR MENU
 sidebar_nav:
   - title: Home
-    url: /
+    url: /index.html
   - title: Mechanics
     url: /mechanics.html
   - title: Shooter Assemblies
