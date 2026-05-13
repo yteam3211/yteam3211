@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Exercise</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #e0e0e0;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        p {
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+        }
+        a {
+            color: #4da6ff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #99ccff;
+            text-decoration: underline;
+        }
+        /* Styling for the dropdown hints */
+        details {
+            background-color: #1a1a1a;
+            padding: 15px 20px;
+            margin: 15px auto 30px auto;
+            border-radius: 8px;
+            border: 1px solid #333;
+            max-width: 600px;
+            text-align: left;
+        }
+        summary {
+            font-weight: bold;
+            cursor: pointer;
+            color: #e0e0e0;
+            margin-bottom: 10px;
+            outline: none;
+            transition: color 0.3s ease;
+        }
+        summary:hover {
+            color: #4da6ff;
+        }
+        /* Styling for code blocks */
+        pre {
+            background-color: #0d0d0d;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            color: #a6e22e; /* A readable green for code */
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: auto;
+        }
+        code {
+            background-color: #1a1a1a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #ffb86c;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .problem-container {
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Java</h1>
+    <p>These are LeetCode problems.<br>Try to complete at least one.</p>
+
+    <div class="problem-container">
+        <p><a href="https://leetcode.com/problems/two-sum/description/" target="_blank">Two Sum</a></p>
+        <details>
+            <summary>Hint</summary>
+            You need to use a nested loop:
+            <pre>
+for (int i = 0; i &lt; nums.length; i++) {
+    for (int j = i + 1; j &lt; nums.length; j++) {
+        // Logic goes here
+    }
+}
+            </pre>
+        </details>
+    </div>
+
+    <div class="problem-container">
+        <p><a href="https://leetcode.com/problems/find-numbers-with-even-number-of-digits/description/" target="_blank">Find Numbers with Even Number of Digits</a></p>
+        <details>
+            <summary>Hint</summary>
+            If you divide a number by 10 using the "/" operator, it removes the last digit.
+            For example, 41523 / 10 becomes 4152.
+            Use this logic to solve the problem.
+        </details>
+    </div>
+
+    <div class="problem-container">
+        <p><a href="https://leetcode.com/problems/reverse-integer/description/" target="_blank">Reverse Integer</a></p>
+        <p>Use <code>Integer.MAX_VALUE</code> and <code>Integer.MIN_VALUE</code> to handle the maximum and minimum values of an integer.</p>
+        <details>
+            <summary>Hint</summary>
+            To check if a number is larger than the maximum integer value, use the <code>long</code> data type.<br>
+            As in the previous question, use "/ 10" to isolate digits.
+        </details>
+        <p><em>This is a good challenge that is quite difficult.</em></p>
+    </div>
+
+    <div class="problem-container">
+        <p><a href="https://leetcode.com/problems/largest-positive-integer-that-exists-with-its-negative" target="_blank">Largest Positive Integer That Exists With Its Negative</a></p>
+        <details>
+            <summary>Hint</summary>
+            You can use a HashSet to store numbers and check if their negative counterparts exist, or sort the array and use two pointers.
+        </details>
+    </div>
+
+    <div class="problem-container">
+        <p><a href="https://leetcode.problemset/?filters=tag%3AJava" target="_blank">Or choose any one of these</a></p>
+    </div>
+
+</body>
+</html>
