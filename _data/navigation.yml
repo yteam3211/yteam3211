@@ -1,0 +1,7 @@
+sidebar:
+  - title: Getting Started
+    url: /docs/setup/
+  - title: Configuration
+    url: /docs/config/
+  - title: Deployment
+    url: /docs/deploy/
