@@ -1,11 +1,16 @@
-title: Team Documentation
-description: Technical documentation and resources.
+# General Site Settings
+title: Team 3211 Documentation
+description: Technical resources and mechanics.
 theme: just-the-docs
-
-url: "https://yourusername.github.io"
-baseurl: "/your-repo-name" # Change this to your repo name, or leave as "" if it's a user site
-
-# Theme Settings
 color_scheme: dark
-search_enabled: true
-heading_anchors: true
+
+# YOUR SIDEBAR MENU
+sidebar_nav:
+  - title: Home
+    url: /
+  - title: Mechanics
+    url: /mechanics.html
+  - title: Shooter Assemblies
+    url: /shooters.html
+  - title: Control Software
+    url: /software.html
