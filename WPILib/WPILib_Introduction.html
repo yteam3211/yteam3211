@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WPILib Introduction</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3, h4 {
+            color: #e0e0e0;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        h4 {
+            text-align: left;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            color: #4da6ff;
+        }
+        p {
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+            text-align: center;
+        }
+        a {
+            color: #4da6ff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #99ccff;
+            text-decoration: underline;
+        }
+        ul, ol {
+            display: inline-block;
+            text-align: left;
+            background-color: #1a1a1a;
+            padding: 20px 40px;
+            margin: 10px auto 30px auto;
+            border-radius: 8px;
+            border: 1px solid #333;
+            max-width: 800px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background: #333;
+            margin: 40px auto;
+            width: 70%;
+        }
+        .nav-links {
+            margin-top: 50px;
+            padding: 20px;
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            border: 1px solid #333;
+            display: inline-block;
+        }
+        .nav-links a {
+            margin: 0 15px;
+            padding: 8px 15px;
+            background-color: #333;
+            border-radius: 5px;
+        }
+        .nav-links a:hover {
+            background-color: #4da6ff;
+            color: #000;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>WPILib</h1>
+
+    <p>WPILib (Worcester Polytechnic Institute Robotics Library) is the official software library used in the <strong>FIRST Robotics Competition (FRC)</strong>. It serves as the foundation for our robot's software, acting as the bridge between the code we write and the physical hardware on the robot.</p>
+
+    <hr>
+
+    <h3>What is WPILib?</h3>
+
+    <p>WPILib is a comprehensive set of open-source software classes and functions designed specifically for FRC. It handles the complex, low-level communication with the <strong>roboRIO</strong> (the robot's brain) so that programmers can focus on high-level logic and robot behavior.</p>
+
+    <p>Instead of writing code to manually toggle electrical pins or manage raw network packets, we use WPILib to simply say "set motor power to 0.5" or "read the angle of this sensor."</p>
+
+    <hr>
+
+    <h3>Core Responsibilities</h3>
+    <ul>
+        <li><strong>Hardware Control:</strong> Providing a standard interface for motor controllers, sensors (gyros, encoders, limit switches), and pneumatic systems.</li>
+        <li><strong>Robot Templates:</strong> Offering structured frameworks—like <strong>Command-Based</strong> or <strong>TimedRobot</strong>—to help organize code and manage the different states of a match (Autonomous, Teleop, and Test).</li>
+        <li><strong>Driver Station Link:</strong> Managing the high-speed communication between the robot on the field and the driver’s laptop.</li>
+        <li><strong>Safety Protocols:</strong> Implementing critical safety features like the "Motor Safety" watchdog, which ensures motors stop if the code stops sending updates.</li>
+        <li><strong>Simulation &amp; Debugging:</strong> Allowing us to run code on a computer to test logic without needing a physical robot, and providing tools like <strong>Shuffleboard</strong> to see data in real-time.</li>
+    </ul>
+
+    <hr>
+
+    <h3>Installation Guide</h3>
+    <p style="text-align: left;">To start programming, you need a specific version of VS Code that comes bundled with all the FRC tools. Follow these steps:</p>
+
+    <h4>1. Download the Installer</h4>
+    <p style="text-align: left;">Go to the <a href="https://github.com/wpilibsuite/allwpilib/releases" target="_blank">official WPILib GitHub Releases page</a> and download the <strong>WPILib_Windows64</strong> (or macOS/Linux) ISO or installer for the current season.</p>
+
+    <h4>2. Run the WPILib Installer</h4>
+    <ul>
+        <li><strong>Select Install Type:</strong> Choose "Everything" to ensure you get the IDE, compilers, and build tools.</li>
+        <li><strong>VS Code:</strong> If you don't have VS Code, the installer will download and configure a standalone version specifically for FRC (this is better than using a standard VS Code install).</li>
+        <li><strong>JDK:</strong> The installer includes the correct version of the Java Development Kit (JDK) needed for robotics.</li>
+    </ul>
+
+    <h4>3. Verification</h4>
+    <p style="text-align: left;">Once finished, look for a new desktop icon called <strong>"WPILib VS Code [Year]"</strong>.</p>
+    <ul>
+        <li>Open it and look for the <strong>WPILib "W" icon</strong> in the top right corner.</li>
+        <li>Clicking that "W" opens the <strong>Command Palette</strong>, which is how you create projects, build code, and deploy to the robot.</li>
+    </ul>
+
+    <hr>
+
+    <h3>Why It Matters for Our Team</h3>
+    <ol>
+        <li><strong>Standardization:</strong> Because almost every FRC team uses WPILib, there is a massive community of documentation, forums, and tutorials available.</li>
+        <li><strong>Compatibility:</strong> It is designed to work perfectly with the vendor libraries we use, such as <strong>CTRE Phoenix</strong> and <strong>REV Lib</strong>.</li>
+        <li><strong>Efficiency:</strong> It allows new programmers to get a robot moving quickly, while still providing the depth needed for advanced control theory, path planning, and sensor fusion.</li>
+    </ol>
+        <br>
+        <div class="nav-links" style="float: left;">
+            <a href="Home.html">⬅️ Previous: home</a>
+        </div>
+        <div class="nav-links" style="float: right;">
+            <a href="WPILib_Resources.html">Next: Docs &amp; Tutorials ➡️</a>
+        </div>
+
+</body>
+</html>
