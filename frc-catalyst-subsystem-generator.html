@@ -1,0 +1,1074 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FRC Catalyst Subsystem Generator</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --panel-2: #f0f4f8;
+      --ink: #17202a;
+      --muted: #64748b;
+      --line: #d8e0ea;
+      --accent: #0f766e;
+      --accent-2: #b45309;
+      --danger: #b91c1c;
+      --code: #121826;
+      --code-ink: #d7e2f0;
+      --focus: 0 0 0 3px rgba(15, 118, 110, 0.22);
+      --shadow: 0 18px 44px rgba(15, 23, 42, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(15, 118, 110, 0.08), transparent 270px),
+        var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1440px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 24px 0;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(26px, 4vw, 42px);
+      line-height: 1.02;
+      font-weight: 800;
+    }
+
+    .subhead {
+      max-width: 720px;
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 15px;
+    }
+
+    .source-link {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(360px, 0.9fr) minmax(420px, 1.1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 58px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel-2);
+    }
+
+    .panel-title h2 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .controls {
+      padding: 16px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    .field label,
+    .check label {
+      color: #263445;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 10px 11px;
+      min-height: 42px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 88px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: var(--focus);
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      padding: 10px 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .check input {
+      width: 18px;
+      min-height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .section {
+      display: grid;
+      gap: 12px;
+      padding-top: 4px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .section-head h3 {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .presets {
+      display: grid;
+      gap: 8px;
+    }
+
+    .preset-row {
+      display: grid;
+      grid-template-columns: 1fr 0.7fr 0.7fr 42px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .preset-row.single {
+      grid-template-columns: 1fr 1fr 42px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      border: 1px solid transparent;
+      border-radius: 8px;
+      min-height: 40px;
+      padding: 9px 12px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    button:hover {
+      filter: brightness(0.96);
+    }
+
+    button:focus {
+      outline: none;
+      box-shadow: var(--focus);
+    }
+
+    .ghost {
+      background: #fff;
+      color: var(--accent);
+      border-color: var(--line);
+    }
+
+    .danger {
+      background: #fff1f2;
+      color: var(--danger);
+      border-color: #fecdd3;
+      padding-inline: 0;
+      width: 42px;
+    }
+
+    .code-wrap {
+      background: var(--code);
+      min-height: 620px;
+      position: relative;
+    }
+
+    pre {
+      margin: 0;
+      padding: 18px;
+      color: var(--code-ink);
+      overflow: auto;
+      font-size: 13px;
+      line-height: 1.55;
+      tab-size: 2;
+      white-space: pre;
+      min-height: 620px;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: 12px;
+      min-height: 20px;
+      display: flex;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      border-radius: 999px;
+      padding: 4px 10px;
+      background: #e0f2f1;
+      color: #115e59;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .code-wrap,
+      pre {
+        min-height: 460px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .app {
+        width: min(100vw - 20px, 1440px);
+        padding: 12px 0;
+      }
+
+      header,
+      .panel-title {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .grid,
+      .preset-row,
+      .preset-row.single {
+        grid-template-columns: 1fr;
+      }
+
+      .danger {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <h1>FRC Catalyst Subsystem Generator</h1>
+        <p class="subhead">
+          Configure a FrcCatalyst mechanism on the left, then copy the generated Java instance snippet on the right.
+          Builder calls are based on the mechanism files in the FrcCatalyst library.
+        </p>
+      </div>
+      <a class="source-link" href="https://github.com/TomAs-1226/FrcCatalyst/tree/main/src/main/java/frc/lib/catalyst/mechanisms" target="_blank" rel="noreferrer">FrcCatalyst mechanisms</a>
+    </header>
+
+    <section class="layout">
+      <form class="panel" id="configForm">
+        <div class="panel-title">
+          <h2>Mechanism Options</h2>
+          <span class="pill" id="mechanismBadge">LinearMechanism</span>
+        </div>
+
+        <div class="controls">
+          <div class="grid">
+            <div class="field">
+              <label for="mechanism">Mechanism</label>
+              <select id="mechanism"></select>
+            </div>
+            <div class="field">
+              <label for="variableName">Variable name</label>
+              <input id="variableName" value="elevator" autocomplete="off" readonly>
+            </div>
+            <div class="field">
+              <label for="catalystName">Catalyst name</label>
+              <input id="catalystName" value="Elevator" autocomplete="off">
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">
+              <h3>Builder Calls</h3>
+              <span class="status" id="apiStatus"></span>
+            </div>
+            <div class="grid" id="mechanismFields"></div>
+          </div>
+
+          <div class="section" id="presetSection">
+            <div class="section-head">
+              <h3>Named Positions</h3>
+              <button type="button" class="ghost" id="addPreset">Add</button>
+            </div>
+            <p class="hint" id="presetHint"></p>
+            <div class="presets" id="presets"></div>
+          </div>
+
+          <div class="section" id="followerSection">
+            <div class="section-head">
+              <h3>Followers</h3>
+              <button type="button" class="ghost" id="addFollower">Add</button>
+            </div>
+            <p class="hint" id="followerHint"></p>
+            <div class="presets" id="followers"></div>
+          </div>
+        </div>
+      </form>
+
+      <section class="panel">
+        <div class="panel-title">
+          <h2>Generated Java Instance</h2>
+          <div class="btn-row">
+            <button type="button" class="ghost" id="copyCode">Copy</button>
+            <button type="button" id="downloadCode">Download</button>
+          </div>
+        </div>
+        <div class="code-wrap">
+          <pre><code id="codeOutput"></code></pre>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const motorTypes = [
+      "",
+      "MotorType.KRAKEN_X60",
+      "MotorType.KRAKEN_X60_FOC",
+      "MotorType.KRAKEN_X44",
+      "MotorType.KRAKEN_X44_FOC",
+      "MotorType.FALCON_500",
+      "MotorType.FALCON_500_FOC"
+    ];
+
+    const definitions = {
+      linear: {
+        label: "LinearMechanism",
+        catalystName: "Elevator",
+        presetHint: "Single value positions use meters, for example STOW = 0.0 and HIGH = 1.1.",
+        presetMode: "single",
+        followerHint: "The first follower uses .follower(...). Any extra rows use .additionalFollower(...).",
+        supportsFollowers: true,
+        multipleFollowers: true,
+        defaultPresets: [
+          { name: "STOW", value: "0.0" },
+          { name: "HIGH", value: "1.1" }
+        ],
+        fields: [
+          num("motor", "Motor CAN ID", "13", ".motor"),
+          text("canBus", "CAN bus", "", ".canBus"),
+          select("motorType", "Motor type", motorTypes, "MotorType.KRAKEN_X60", ".motorType"),
+          bool("inverted", "Inverted", false, ".inverted"),
+          num("gearRatio", "Gear ratio", "9", ".gearRatio"),
+          num("drumRadius", "Drum radius meters", "0.02", ".drumRadius"),
+          num("stages", "Stages", "1", ".stages"),
+          pair("range", "Range meters", "0", "1.4", ".range", "min", "max"),
+          num("startingPosition", "Start meters", "0", ".startingPosition"),
+          num("mass", "Mass kg", "", ".mass"),
+          num("currentLimit", "Current limit amps", "40", ".currentLimit"),
+          num("statorCurrentLimit", "Stator limit amps", "", ".statorCurrentLimit"),
+          triple("pid", "PID", "0.7", "0", "0", ".pid", "kP", "kI", "kD"),
+          triple("feedforward", "Feedforward", "0.12", "0.0", "0.0", ".feedforward", "kS", "kV", "kA"),
+          num("gravityGain", "Gravity gain", "", ".gravityGain"),
+          triple("motionMagic", "Motion Magic", "80", "160", "1600", ".motionMagic", "cruise", "accel", "jerk"),
+          num("forwardLimitSwitch", "Forward limit DIO", "", ".forwardLimitSwitch"),
+          bool("forwardAutoZero", "Forward auto-zero", false),
+          num("reverseLimitSwitch", "Reverse limit DIO", "", ".reverseLimitSwitch"),
+          bool("reverseAutoZero", "Reverse auto-zero", false),
+          num("positionTolerance", "Tolerance meters", "0.02", ".positionTolerance"),
+          num("maxTemperature", "Max temperature C", "70", ".maxTemperature")
+        ],
+      },
+      rotational: {
+        label: "RotationalMechanism",
+        catalystName: "Arm",
+        presetHint: "Single value positions use degrees, for example STOW = 0 and SCORE = 100.",
+        presetMode: "single",
+        followerHint: "The first follower uses .follower(...). Any extra rows use .additionalFollower(...).",
+        supportsFollowers: true,
+        multipleFollowers: true,
+        defaultPresets: [
+          { name: "STOW", value: "0" },
+          { name: "SCORE", value: "100" }
+        ],
+        fields: [
+          num("motor", "Motor CAN ID", "15", ".motor"),
+          text("canBus", "CAN bus", "", ".canBus"),
+          select("motorType", "Motor type", motorTypes, "MotorType.KRAKEN_X60", ".motorType"),
+          bool("inverted", "Inverted", false, ".inverted"),
+          num("gearRatio", "Gear ratio", "100", ".gearRatio"),
+          num("length", "Arm length meters", "0.45", ".length"),
+          num("mass", "Mass kg", "4", ".mass"),
+          num("moi", "Custom MOI", "", ".moi"),
+          pair("range", "Range degrees", "-20", "120", ".range", "min", "max"),
+          num("startingAngle", "Start degrees", "0", ".startingAngle"),
+          bool("useCosineGravity", "Cosine gravity", true, ".useCosineGravity", true),
+          num("currentLimit", "Current limit amps", "40", ".currentLimit"),
+          num("statorCurrentLimit", "Stator limit amps", "", ".statorCurrentLimit"),
+          triple("pid", "PID", "0.5", "0", "0", ".pid", "kP", "kI", "kD"),
+          triple("feedforward", "Feedforward", "0.1", "0.0", "0.0", ".feedforward", "kS", "kV", "kA"),
+          num("gravityGain", "Gravity gain", "0.25", ".gravityGain"),
+          triple("motionMagic", "Motion Magic", "1.2", "2.4", "24", ".motionMagic", "cruise", "accel", "jerk"),
+          num("hardStopPort", "Hard stop DIO", "", ".hardStop"),
+          bool("hardStopAutoZero", "Hard stop auto-zero", false),
+          num("hardStopHomeAngle", "Home angle", "0"),
+          num("tolerance", "Tolerance degrees", "2", ".tolerance"),
+          num("maxTemperature", "Max temperature C", "70", ".maxTemperature")
+        ],
+      },
+      flywheel: {
+        label: "FlywheelMechanism",
+        catalystName: "Shooter",
+        presetHint: "",
+        presetMode: "none",
+        supportsFollowers: false,
+        fields: [
+          num("motor", "Primary CAN ID", "20", ".motor"),
+          num("secondMotor", "Second CAN ID", "", ".secondMotor"),
+          text("canBus", "CAN bus", "", ".canBus"),
+          select("motorType", "Motor type", motorTypes, "MotorType.KRAKEN_X60", ".motorType"),
+          bool("primaryInverted", "Primary inverted", false, ".primaryInverted"),
+          bool("secondaryInverted", "Secondary inverted", false, ".secondaryInverted"),
+          num("gearRatio", "Gear ratio", "1", ".gearRatio"),
+          num("moi", "MOI kg m2", "0.003", ".moi"),
+          num("currentLimit", "Current limit amps", "40", ".currentLimit"),
+          num("statorCurrentLimit", "Stator limit amps", "", ".statorCurrentLimit"),
+          num("velocityTolerance", "Tolerance RPS", "3", ".velocityTolerance"),
+          triple("pid", "PID", "0.2", "0", "0", ".pid", "kP", "kI", "kD"),
+          triple("feedforward", "Feedforward", "0.12", "0.11", "0", ".feedforward", "kS", "kV", "kA")
+        ]
+      },
+      roller: {
+        label: "RollerMechanism",
+        catalystName: "Intake",
+        presetHint: "",
+        presetMode: "none",
+        supportsFollowers: false,
+        fields: [
+          num("motor", "Motor CAN ID", "16", ".motor"),
+          text("canBus", "CAN bus", "", ".canBus"),
+          bool("inverted", "Inverted", false, ".inverted"),
+          bool("brakeMode", "Brake mode", true, ".brakeMode", true),
+          num("currentLimit", "Current limit amps", "35", ".currentLimit"),
+          num("statorCurrentLimit", "Stator limit amps", "", ".statorCurrentLimit"),
+          num("intakeSpeed", "Intake speed", "0.65", ".intakeSpeed"),
+          num("ejectSpeed", "Eject speed", "-0.55", ".ejectSpeed"),
+          pair("stallDetection", "Stall detect", "45", "0.25", ".stallDetection", "amps", "seconds"),
+          num("beamBreak", "Beam break DIO", "", ".beamBreak")
+        ]
+      },
+      claw: {
+        label: "ClawMechanism",
+        catalystName: "Claw",
+        presetHint: "",
+        presetMode: "none",
+        followerHint: "ClawMechanism supports one follower row.",
+        supportsFollowers: true,
+        multipleFollowers: false,
+        fields: [
+          num("motor", "Motor CAN ID", "30", ".motor"),
+          text("canBus", "CAN bus", "", ".canBus"),
+          bool("inverted", "Inverted", false, ".inverted"),
+          bool("brakeMode", "Brake mode", true, ".brakeMode", true),
+          num("currentLimit", "Current limit amps", "30", ".currentLimit"),
+          num("statorCurrentLimit", "Stator limit amps", "", ".statorCurrentLimit"),
+          num("closeVoltage", "Close volts", "4", ".closeVoltage"),
+          num("openVoltage", "Open volts", "-4", ".openVoltage"),
+          num("holdVoltage", "Hold volts", "0.6", ".holdVoltage"),
+          pair("stallDetection", "Stall detect", "35", "0.2", ".stallDetection", "amps", "seconds"),
+          num("beamBreak", "Beam break DIO", "", ".beamBreak")
+        ]
+      },
+      pneumatic: {
+        label: "PneumaticMechanism",
+        catalystName: "ClimbHook",
+        presetHint: "",
+        presetMode: "none",
+        supportsFollowers: false,
+        fields: [
+          select("solenoidType", "Solenoid type", ["double", "single"], "double"),
+          select("moduleType", "Module type", ["PneumaticsModuleType.REVPH", "PneumaticsModuleType.CTREPCM"], "PneumaticsModuleType.REVPH"),
+          num("forwardChannel", "Forward channel", "0"),
+          num("reverseChannel", "Reverse channel", "1"),
+          num("singleChannel", "Single channel", "0"),
+          bool("compressor", "Attach compressor", false),
+          num("requirePressureAbove", "Min pressure PSI", "", ".requirePressureAbove")
+        ]
+      },
+      winch: {
+        label: "WinchMechanism",
+        catalystName: "Climber",
+        presetHint: "",
+        presetMode: "none",
+        supportsFollowers: false,
+        fields: [
+          num("motor", "Motor CAN ID", "25", ".motor"),
+          num("secondMotor", "Second CAN ID", "", ".secondMotor"),
+          text("canBus", "CAN bus", "", ".canBus"),
+          bool("inverted", "Inverted", false, ".inverted"),
+          bool("secondInverted", "Second inverted", false, ".secondInverted"),
+          num("gearRatio", "Gear ratio", "36", ".gearRatio"),
+          num("spoolRadius", "Spool radius meters", "0.018", ".spoolRadius"),
+          pair("range", "Range meters", "0", "0.8", ".range", "min", "max"),
+          num("currentLimit", "Current limit amps", "45", ".currentLimit"),
+          num("statorCurrentLimit", "Stator limit amps", "", ".statorCurrentLimit"),
+          num("extendSpeed", "Extend speed", "0.65", ".extendSpeed"),
+          num("retractSpeed", "Retract speed", "-0.55", ".retractSpeed")
+        ]
+      },
+      diffwrist: {
+        label: "DifferentialWristMechanism",
+        catalystName: "Wrist",
+        presetHint: "Differential wrist positions use pitch and roll degrees.",
+        presetMode: "dual",
+        supportsFollowers: false,
+        defaultPresets: [
+          { name: "STOW", pitch: "0", roll: "0" },
+          { name: "SCORE", pitch: "45", roll: "0" }
+        ],
+        fields: [
+          num("leftMotor", "Left CAN ID", "40", ".leftMotor"),
+          num("rightMotor", "Right CAN ID", "41", ".rightMotor"),
+          text("canBus", "CAN bus", "", ".canBus"),
+          bool("leftInverted", "Left inverted", false, ".leftInverted"),
+          bool("rightInverted", "Right inverted", false, ".rightInverted"),
+          num("gearRatio", "Gear ratio", "60", ".gearRatio"),
+          pair("pitchRange", "Pitch range degrees", "-90", "90", ".pitchRange", "min", "max"),
+          pair("rollRange", "Roll range degrees", "-60", "60", ".rollRange", "min", "max"),
+          num("currentLimit", "Current limit amps", "35", ".currentLimit"),
+          num("statorCurrentLimit", "Stator limit amps", "", ".statorCurrentLimit"),
+          triple("pid", "PID", "0.4", "0", "0", ".pid", "kP", "kI", "kD"),
+          triple("feedforward", "Feedforward", "0.08", "0", "0", ".feedforward", "kS", "kV", "kA"),
+          triple("motionMagic", "Motion Magic", "1.2", "2.4", "24", ".motionMagic", "cruise", "accel", "jerk"),
+          num("tolerance", "Tolerance degrees", "2", ".tolerance")
+        ]
+      }
+    };
+
+    const state = {
+      presets: [],
+      followers: []
+    };
+
+    function num(id, label, value, method, placeholder) {
+      return { id, label, type: "number", value, method, placeholder };
+    }
+
+    function text(id, label, value, method, placeholder) {
+      return { id, label, type: "text", value, method, placeholder };
+    }
+
+    function select(id, label, options, value, method) {
+      return { id, label, type: "select", options, value, method };
+    }
+
+    function bool(id, label, value, method, always) {
+      return { id, label, type: "boolean", value, method, always };
+    }
+
+    function pair(id, label, a, b, method, aLabel, bLabel) {
+      return { id, label, type: "pair", value: [a, b], method, labels: [aLabel, bLabel] };
+    }
+
+    function triple(id, label, a, b, c, method, aLabel, bLabel, cLabel) {
+      return { id, label, type: "triple", value: [a, b, c], method, labels: [aLabel, bLabel, cLabel] };
+    }
+
+    function byId(id) {
+      return document.getElementById(id);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    function escapeJava(value) {
+      return String(value).replaceAll("\\", "\\\\").replaceAll("\"", "\\\"");
+    }
+
+    function javaValue(value) {
+      const trimmed = String(value ?? "").trim();
+      if (trimmed === "") return "";
+      return trimmed;
+    }
+
+    function toVariableName(value) {
+      const words = String(value || "mechanism")
+        .replace(/[^A-Za-z0-9]+/g, " ")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+      if (!words.length) return "mechanism";
+      const joined = words
+        .map((word, index) => {
+          const lower = word.toLowerCase();
+          if (index === 0) return lower;
+          return lower.charAt(0).toUpperCase() + lower.slice(1);
+        })
+        .join("");
+      return /^[A-Za-z_$]/.test(joined) ? joined : "mechanism";
+    }
+
+    function lineFromSingle(field, values) {
+      if (!field.method) return null;
+      if (field.type === "boolean") {
+        if (field.always || values[field.id]) return `${field.method}(${values[field.id] ? "true" : "false"})`;
+        return null;
+      }
+      const value = javaValue(values[field.id]);
+      if (!value) return null;
+      if (field.type === "text" && field.method !== ".motorType") return `${field.method}("${escapeJava(value)}")`;
+      return `${field.method}(${value})`;
+    }
+
+    function readValues() {
+      const values = {};
+      document.querySelectorAll("[data-field]").forEach((node) => {
+        if (node.type === "checkbox") {
+          values[node.dataset.field] = node.checked;
+        } else {
+          values[node.dataset.field] = node.value;
+        }
+      });
+      values.catalystName = byId("catalystName").value.trim();
+      values.variableName = byId("variableName").value.trim();
+      return values;
+    }
+
+    function renderMechanismSelect() {
+      byId("mechanism").innerHTML = Object.entries(definitions)
+        .map(([key, def]) => `<option value="${key}">${def.label}</option>`)
+        .join("");
+    }
+
+    function renderFields(def) {
+      const html = def.fields.map((field) => {
+        if (field.type === "boolean") {
+          return `
+            <div class="field">
+              <div class="check">
+                <input id="${field.id}" data-field="${field.id}" type="checkbox" ${field.value ? "checked" : ""}>
+                <label for="${field.id}">${field.label}</label>
+              </div>
+            </div>`;
+        }
+
+        if (field.type === "select") {
+          const options = field.options.map((opt) => {
+            const label = opt || "Skip";
+            return `<option value="${opt}" ${opt === field.value ? "selected" : ""}>${label}</option>`;
+          }).join("");
+          return `
+            <div class="field">
+              <label for="${field.id}">${field.label}</label>
+              <select id="${field.id}" data-field="${field.id}">${options}</select>
+            </div>`;
+        }
+
+        if (field.type === "pair") {
+          return `
+            <div class="field full">
+              <label>${field.label}</label>
+              <div class="grid">
+                <input data-field="${field.id}A" value="${field.value[0]}" placeholder="${field.labels[0]}">
+                <input data-field="${field.id}B" value="${field.value[1]}" placeholder="${field.labels[1]}">
+              </div>
+            </div>`;
+        }
+
+        if (field.type === "triple") {
+          return `
+            <div class="field full">
+              <label>${field.label}</label>
+              <div class="grid">
+                <input data-field="${field.id}A" value="${field.value[0]}" placeholder="${field.labels[0]}">
+                <input data-field="${field.id}B" value="${field.value[1]}" placeholder="${field.labels[1]}">
+                <input data-field="${field.id}C" value="${field.value[2]}" placeholder="${field.labels[2]}">
+              </div>
+            </div>`;
+        }
+
+        const placeholder = field.placeholder ? ` placeholder="${escapeHtml(field.placeholder)}"` : "";
+        return `
+          <div class="field">
+            <label for="${field.id}">${field.label}</label>
+            <input id="${field.id}" data-field="${field.id}" value="${escapeHtml(field.value)}"${placeholder}>
+          </div>`;
+      }).join("");
+      byId("mechanismFields").innerHTML = html;
+    }
+
+    function renderPresets(def) {
+      const section = byId("presetSection");
+      if (def.presetMode === "none") {
+        section.style.display = "none";
+        return;
+      }
+      section.style.display = "";
+      byId("presetHint").textContent = def.presetHint;
+      byId("presets").innerHTML = state.presets.map((preset, index) => {
+        if (def.presetMode === "dual") {
+          return `
+            <div class="preset-row" data-preset="${index}">
+              <input data-preset-field="name" value="${escapeHtml(preset.name)}" placeholder="Name">
+              <input data-preset-field="pitch" value="${escapeHtml(preset.pitch)}" placeholder="Pitch">
+              <input data-preset-field="roll" value="${escapeHtml(preset.roll)}" placeholder="Roll">
+              <button type="button" class="danger" data-remove-preset="${index}" aria-label="Remove preset">X</button>
+            </div>`;
+        }
+        return `
+          <div class="preset-row single" data-preset="${index}">
+            <input data-preset-field="name" value="${escapeHtml(preset.name)}" placeholder="Name">
+            <input data-preset-field="value" value="${escapeHtml(preset.value)}" placeholder="Value">
+            <button type="button" class="danger" data-remove-preset="${index}" aria-label="Remove preset">X</button>
+          </div>`;
+      }).join("");
+    }
+
+    function syncPresetState() {
+      document.querySelectorAll("[data-preset]").forEach((row) => {
+        const index = Number(row.dataset.preset);
+        row.querySelectorAll("[data-preset-field]").forEach((input) => {
+          state.presets[index][input.dataset.presetField] = input.value;
+        });
+      });
+    }
+
+    function renderFollowers(def) {
+      const section = byId("followerSection");
+      if (!def.supportsFollowers) {
+        section.style.display = "none";
+        return;
+      }
+      section.style.display = "";
+      byId("followerHint").textContent = def.followerHint || "";
+      byId("addFollower").disabled = def.multipleFollowers === false && state.followers.length >= 1;
+      byId("followers").innerHTML = state.followers.map((follower, index) => `
+        <div class="preset-row single" data-follower="${index}">
+          <input data-follower-field="canId" value="${escapeHtml(follower.canId)}" placeholder="CAN ID">
+          <div class="check">
+            <input id="followerOppose${index}" data-follower-field="oppose" type="checkbox" ${follower.oppose ? "checked" : ""}>
+            <label for="followerOppose${index}">Oppose</label>
+          </div>
+          <button type="button" class="danger" data-remove-follower="${index}" aria-label="Remove follower">X</button>
+        </div>
+      `).join("");
+    }
+
+    function syncFollowerState() {
+      document.querySelectorAll("[data-follower]").forEach((row) => {
+        const index = Number(row.dataset.follower);
+        row.querySelectorAll("[data-follower-field]").forEach((input) => {
+          state.followers[index][input.dataset.followerField] = input.type === "checkbox"
+            ? input.checked
+            : input.value;
+        });
+      });
+    }
+
+    function setMechanism(key) {
+      const def = definitions[key];
+      state.presets = (def.defaultPresets || []).map((preset) => ({ ...preset }));
+      byId("catalystName").value = def.catalystName;
+      byId("variableName").value = toVariableName(def.catalystName);
+      byId("mechanismBadge").textContent = def.label;
+      byId("apiStatus").textContent = `${def.fields.length} configurable calls`;
+      state.followers = [];
+      renderFields(def);
+      renderPresets(def);
+      renderFollowers(def);
+      generate();
+    }
+
+    function collectBuilderLines(def, values) {
+      const lines = [`.name("${escapeJava(values.catalystName || def.catalystName)}")`];
+      const trailingLines = [];
+
+      def.fields.forEach((field) => {
+        if (field.id === "maxTemperature") {
+          const line = lineFromSingle(field, values);
+          if (line) trailingLines.push(line);
+          return;
+        }
+
+        if (field.id === "forwardLimitSwitch" && javaValue(values.forwardLimitSwitch)) {
+          lines.push(`.forwardLimitSwitch(${javaValue(values.forwardLimitSwitch)}, ${values.forwardAutoZero ? "true" : "false"})`);
+          return;
+        }
+
+        if (field.id === "reverseLimitSwitch" && javaValue(values.reverseLimitSwitch)) {
+          lines.push(`.reverseLimitSwitch(${javaValue(values.reverseLimitSwitch)}, ${values.reverseAutoZero ? "true" : "false"})`);
+          return;
+        }
+
+        if (field.id === "hardStopPort" && javaValue(values.hardStopPort)) {
+          const home = javaValue(values.hardStopHomeAngle) || "0";
+          lines.push(`.hardStop(${javaValue(values.hardStopPort)}, ${values.hardStopAutoZero ? "true" : "false"}, ${home})`);
+          return;
+        }
+
+        if (field.id === "solenoidType") {
+          if (values.solenoidType === "single") {
+            lines.push(`.singleSolenoid(${values.moduleType}, ${javaValue(values.singleChannel) || "0"})`);
+          } else {
+            lines.push(`.doubleSolenoid(${values.moduleType}, ${javaValue(values.forwardChannel) || "0"}, ${javaValue(values.reverseChannel) || "1"})`);
+          }
+          if (values.compressor) lines.push(`.compressor(${values.moduleType})`);
+          return;
+        }
+
+        if (["moduleType", "forwardChannel", "reverseChannel", "singleChannel", "compressor", "forwardAutoZero", "reverseAutoZero", "hardStopAutoZero", "hardStopHomeAngle"].includes(field.id)) {
+          return;
+        }
+
+        if (field.type === "pair") {
+          const a = javaValue(values[field.id + "A"]);
+          const b = javaValue(values[field.id + "B"]);
+          if (a && b) lines.push(`${field.method}(${a}, ${b})`);
+          return;
+        }
+
+        if (field.type === "triple") {
+          const a = javaValue(values[field.id + "A"]);
+          const b = javaValue(values[field.id + "B"]);
+          const c = javaValue(values[field.id + "C"]);
+          if (a && b && c) lines.push(`${field.method}(${a}, ${b}, ${c})`);
+          return;
+        }
+
+        const line = lineFromSingle(field, values);
+        if (line) lines.push(line);
+      });
+
+      if (def.presetMode === "single") {
+        state.presets.forEach((preset) => {
+          if (preset.name && javaValue(preset.value)) {
+            lines.push(`.position("${escapeJava(preset.name)}", ${javaValue(preset.value)})`);
+          }
+        });
+      }
+
+      if (def.presetMode === "dual") {
+        state.presets.forEach((preset) => {
+          if (preset.name && javaValue(preset.pitch) && javaValue(preset.roll)) {
+            lines.push(`.position("${escapeJava(preset.name)}", ${javaValue(preset.pitch)}, ${javaValue(preset.roll)})`);
+          }
+        });
+      }
+
+      state.followers.forEach((follower, index) => {
+        const canId = javaValue(follower.canId);
+        if (!canId) return;
+        const method = index === 0 ? ".follower" : ".additionalFollower";
+        lines.push(`${method}(${canId}, ${follower.oppose ? "true" : "false"})`);
+      });
+
+      return [...lines, ...trailingLines];
+    }
+
+    function generatedInstance(def, values) {
+      const builderLines = collectBuilderLines(def, values)
+        .map((line) => `        ${line}`)
+        .join("\n");
+      return `${def.label} ${values.variableName || toVariableName(values.catalystName)} = new ${def.label}(
+    ${def.label}.Config.builder()
+${builderLines}
+        .build());\n`;
+    }
+
+    function generate() {
+      syncPresetState();
+      syncFollowerState();
+      const key = byId("mechanism").value;
+      const def = definitions[key];
+      const values = readValues();
+      byId("codeOutput").textContent = generatedInstance(def, values);
+    }
+
+    function initEvents() {
+      byId("mechanism").addEventListener("change", (event) => setMechanism(event.target.value));
+      byId("configForm").addEventListener("input", generate);
+      byId("configForm").addEventListener("change", generate);
+      byId("catalystName").addEventListener("input", () => {
+        byId("variableName").value = toVariableName(byId("catalystName").value);
+        generate();
+      });
+
+      byId("addPreset").addEventListener("click", () => {
+        syncPresetState();
+        const def = definitions[byId("mechanism").value];
+        state.presets.push(def.presetMode === "dual"
+          ? { name: "NEW", pitch: "0", roll: "0" }
+          : { name: "NEW", value: "0" });
+        renderPresets(def);
+        generate();
+      });
+
+      byId("presets").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-remove-preset]");
+        if (!button) return;
+        state.presets.splice(Number(button.dataset.removePreset), 1);
+        renderPresets(definitions[byId("mechanism").value]);
+        generate();
+      });
+
+      byId("addFollower").addEventListener("click", () => {
+        const def = definitions[byId("mechanism").value];
+        if (def.multipleFollowers === false && state.followers.length >= 1) return;
+        state.followers.push({ canId: "", oppose: false });
+        renderFollowers(def);
+        generate();
+      });
+
+      byId("followers").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-remove-follower]");
+        if (!button) return;
+        state.followers.splice(Number(button.dataset.removeFollower), 1);
+        renderFollowers(definitions[byId("mechanism").value]);
+        generate();
+      });
+
+      byId("copyCode").addEventListener("click", async () => {
+        await copyText(byId("codeOutput").textContent);
+        byId("copyCode").textContent = "Copied";
+        setTimeout(() => byId("copyCode").textContent = "Copy", 1000);
+      });
+
+      byId("downloadCode").addEventListener("click", () => {
+        const values = readValues();
+        const filename = `${values.variableName || "mechanism"}-snippet.java`;
+        const blob = new Blob([byId("codeOutput").textContent], { type: "text/x-java-source" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    async function copyText(text) {
+      if (navigator.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return;
+        } catch (error) {
+          // Local file pages may not receive clipboard permission.
+        }
+      }
+
+      const helper = document.createElement("textarea");
+      helper.value = text;
+      helper.setAttribute("readonly", "");
+      helper.style.position = "fixed";
+      helper.style.left = "-9999px";
+      document.body.appendChild(helper);
+      helper.select();
+      document.execCommand("copy");
+      helper.remove();
+    }
+
+    renderMechanismSelect();
+    initEvents();
+    setMechanism("linear");
+  </script>
+</body>
+</html>
