@@ -95,6 +95,12 @@
       overflow: hidden;
     }
 
+    .form-panel {
+      overflow: visible;
+      position: relative;
+      z-index: 2;
+    }
+
     .panel-title {
       display: flex;
       align-items: center;
@@ -116,6 +122,7 @@
       padding: 16px;
       display: grid;
       gap: 16px;
+      overflow: visible;
     }
 
     .grid {
@@ -140,6 +147,61 @@
       font-size: 12px;
       font-weight: 800;
       text-transform: uppercase;
+    }
+
+    .label-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .help-chip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 1px solid #94a3b8;
+      background: #fff;
+      color: #475569;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1;
+      cursor: help;
+      flex: 0 0 auto;
+    }
+
+    .help-chip::after {
+      content: attr(data-help);
+      position: absolute;
+      left: 50%;
+      top: calc(100% + 8px);
+      transform: translateX(-50%);
+      width: min(280px, 72vw);
+      padding: 9px 10px;
+      border-radius: 8px;
+      background: #17202a;
+      color: #f8fafc;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.4;
+      text-transform: none;
+      letter-spacing: 0;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.22);
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+      transition: opacity 120ms ease;
+      z-index: 20;
+    }
+
+    .help-chip:hover::after,
+    .help-chip:focus-visible::after {
+      opacity: 1;
+      visibility: visible;
     }
 
     input,
@@ -217,6 +279,19 @@
       gap: 8px;
     }
 
+    .row-head {
+      display: grid;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .row-head span {
+      color: #263445;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
     .preset-row {
       display: grid;
       grid-template-columns: 1fr 0.7fr 0.7fr 42px;
@@ -267,6 +342,85 @@
       border-color: #fecdd3;
       padding-inline: 0;
       width: 42px;
+    }
+
+    .field-action {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .mini-btn {
+      min-height: 30px;
+      padding: 5px 9px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .gain-dialog {
+      width: min(760px, calc(100vw - 28px));
+      border: 0;
+      border-radius: 8px;
+      padding: 0;
+      color: var(--ink);
+      box-shadow: 0 28px 80px rgba(15, 23, 42, 0.32);
+    }
+
+    .gain-dialog::backdrop {
+      background: rgba(15, 23, 42, 0.44);
+    }
+
+    .gain-card {
+      display: grid;
+      gap: 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+    }
+
+    .gain-body {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .gain-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .gain-result {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fafc;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .gain-result strong {
+      color: #263445;
+    }
+
+    .gain-result ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .gain-result li + li {
+      margin-top: 4px;
+    }
+
+    .gain-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 12px 16px 16px;
+      flex-wrap: wrap;
     }
 
     .code-wrap {
@@ -335,6 +489,7 @@
       }
 
       .grid,
+      .gain-grid,
       .preset-row,
       .preset-row.single {
         grid-template-columns: 1fr;
@@ -360,7 +515,7 @@
     </header>
 
     <section class="layout">
-      <form class="panel" id="configForm">
+      <form class="panel form-panel" id="configForm">
         <div class="panel-title">
           <h2>Mechanism Options</h2>
           <span class="pill" id="mechanismBadge">LinearMechanism</span>
@@ -369,15 +524,15 @@
         <div class="controls">
           <div class="grid">
             <div class="field">
-              <label for="mechanism">Mechanism</label>
+              <label class="label-row" for="mechanism">Mechanism <span class="help-chip" tabindex="0" data-help="Choose which FrcCatalyst mechanism class to generate a builder snippet for.">?</span></label>
               <select id="mechanism"></select>
             </div>
             <div class="field">
-              <label for="variableName">Variable name</label>
+              <label class="label-row" for="variableName">Variable name <span class="help-chip" tabindex="0" data-help="This is the Java variable name for the mechanism instance. It is generated automatically from the Catalyst name.">?</span></label>
               <input id="variableName" value="elevator" autocomplete="off" readonly>
             </div>
             <div class="field">
-              <label for="catalystName">Catalyst name</label>
+              <label class="label-row" for="catalystName">Catalyst name <span class="help-chip" tabindex="0" data-help="Sets the value used in .name(...). This is the mechanism name shown in logs, tuning, and alerts.">?</span></label>
               <input id="catalystName" value="Elevator" autocomplete="off">
             </div>
           </div>
@@ -424,6 +579,53 @@
       </section>
     </section>
   </main>
+
+  <dialog class="gain-dialog" id="gainDialog">
+    <form class="gain-card" method="dialog">
+      <div class="panel-title">
+        <div>
+          <h2 id="gainDialogTitle">Estimate PID and Feedforward</h2>
+          <p class="hint" id="gainDialogHint"></p>
+        </div>
+        <button type="submit" class="ghost mini-btn" aria-label="Close gain estimator">Close</button>
+      </div>
+      <div class="gain-body">
+        <div class="gain-grid">
+          <div class="field">
+            <label for="estimateMaxVoltage">Available volts</label>
+            <input id="estimateMaxVoltage" value="12">
+          </div>
+          <div class="field">
+            <label for="estimateStaticFriction">Static friction volts</label>
+            <input id="estimateStaticFriction" value="0.18">
+          </div>
+          <div class="field">
+            <label for="estimateCorrectionError" id="estimateCorrectionErrorLabel">Full correction error</label>
+            <input id="estimateCorrectionError" value="">
+          </div>
+          <div class="field">
+            <label for="estimateMeasuredVelocity" id="estimateVelocityLabel">Measured max velocity</label>
+            <input id="estimateMeasuredVelocity" placeholder="Optional">
+          </div>
+          <div class="field">
+            <label for="estimateMeasuredAcceleration" id="estimateAccelerationLabel">Measured max acceleration</label>
+            <input id="estimateMeasuredAcceleration" placeholder="Optional">
+          </div>
+          <div class="field full">
+            <label for="estimateExtraInertia">Load inertia kg*m2</label>
+            <input id="estimateExtraInertia" placeholder="Optional; useful for wrists and flywheels">
+          </div>
+        </div>
+        <div class="gain-result" id="gainEstimateResult">
+          Enter any measurements you have, then calculate a starting point.
+        </div>
+      </div>
+      <div class="gain-footer">
+        <button type="button" class="ghost" id="calculateEstimatedGains">Calculate</button>
+        <button type="button" id="applyEstimatedGains">Use estimates</button>
+      </div>
+    </form>
+  </dialog>
 
   <script>
     const motorTypes = [
@@ -640,9 +842,129 @@
       }
     };
 
+    const fieldHelp = {
+      common: {
+        canBus: "Sets the CAN bus name used by the mechanism motor controllers. Leave it blank for the default bus.",
+        motorType: "Chooses the motor model used by Catalyst. This mainly affects simulation and motor characterization data.",
+        inverted: "Flips the main motor direction if the mechanism moves the wrong way.",
+        gearRatio: "Motor rotations per mechanism rotation. Use the full ratio from the motor to the driven mechanism.",
+        currentLimit: "Limits supply current to help protect wiring and hardware.",
+        statorCurrentLimit: "Limits motor stator current. Use this when you need tighter torque or heat protection.",
+        pid: "Closed-loop PID gains. Enter kP, kI, and kD in order.",
+        feedforward: "Feedforward gains. Enter kS, kV, and kA in order.",
+        motionMagic: "Motion Magic profile values. Enter cruise velocity, acceleration, and jerk in mechanism units.",
+        maxTemperature: "Maximum allowed motor temperature in Celsius before Catalyst raises a warning.",
+        tolerance: "How close the mechanism must be to the target angle to count as at position.",
+        range: "Software travel limits for the mechanism. Enter minimum first, then maximum.",
+        catalystName: "Sets the value used in .name(...). This is the mechanism name shown in logs, tuning, and alerts."
+      },
+      LinearMechanism: {
+        motor: "Main motor CAN ID for the linear mechanism.",
+        drumRadius: "Drum or pulley radius in meters used to convert motor rotations into linear travel.",
+        stages: "Number of elevator stages. This scales travel conversion for cascading elevators.",
+        startingPosition: "Mechanism position in meters when the robot starts up.",
+        mass: "Moving mass in kilograms. Catalyst uses this for simulation and feedforward behavior.",
+        gravityGain: "Gravity compensation gain for holding the mechanism against gravity.",
+        forwardLimitSwitch: "DIO port for the forward limit switch.",
+        forwardAutoZero: "If enabled, Catalyst will zero the mechanism when the forward limit switch is pressed.",
+        reverseLimitSwitch: "DIO port for the reverse limit switch.",
+        reverseAutoZero: "If enabled, Catalyst will zero the mechanism when the reverse limit switch is pressed.",
+        positionTolerance: "Allowed position error in meters before the mechanism is considered at target.",
+        presetName: "Name of a saved linear position, like STOW or HIGH.",
+        presetValue: "Target position in meters for this saved linear position.",
+        followerCanId: "CAN ID for a follower motor that mirrors the main mechanism motor.",
+        followerOppose: "Makes the follower spin opposite the main motor when the mechanism requires it."
+      },
+      RotationalMechanism: {
+        motor: "Main motor CAN ID for the rotational mechanism.",
+        length: "Arm length in meters from the pivot to the center of mass, used for simulation.",
+        mass: "Arm mass in kilograms, used for simulation and gravity compensation.",
+        moi: "Custom moment of inertia in kg*m^2. Leave blank to let Catalyst estimate it.",
+        startingAngle: "Mechanism angle in degrees when the robot starts up.",
+        useCosineGravity: "Enable cosine gravity compensation for arms. Turn it off for mechanisms like turrets.",
+        gravityGain: "Gravity compensation gain used to help hold the arm up.",
+        hardStopPort: "DIO port for the hard stop or home switch.",
+        hardStopAutoZero: "If enabled, Catalyst zeroes the mechanism when the hard stop is reached.",
+        hardStopHomeAngle: "Angle in degrees to assign when the hard stop auto-zero event happens.",
+        maxTemperature: "Maximum allowed motor temperature in Celsius before Catalyst raises a warning.",
+        presetName: "Name of a saved angle, like STOW or SCORE.",
+        presetValue: "Target angle in degrees for this saved position.",
+        followerCanId: "CAN ID for a follower motor that mirrors the main mechanism motor.",
+        followerOppose: "Makes the follower spin opposite the main motor when the mechanism requires it."
+      },
+      FlywheelMechanism: {
+        motor: "Primary flywheel motor CAN ID.",
+        secondMotor: "Optional second flywheel motor CAN ID for dual-wheel setups.",
+        primaryInverted: "Flips the primary motor direction if needed.",
+        secondaryInverted: "Flips the secondary motor direction if needed.",
+        moi: "Flywheel moment of inertia in kg*m^2, used for simulation.",
+        velocityTolerance: "Allowed speed error in rotations per second before the flywheel is considered at speed."
+      },
+      RollerMechanism: {
+        motor: "Main roller motor CAN ID.",
+        brakeMode: "Keeps the motor resisting motion when output is zero.",
+        intakeSpeed: "Percent output used while intaking a game piece.",
+        ejectSpeed: "Percent output used while ejecting a game piece.",
+        stallDetection: "Current and time thresholds used to detect a stalled roller.",
+        beamBreak: "DIO port for a beam break sensor used to detect a game piece."
+      },
+      ClawMechanism: {
+        motor: "Main claw motor CAN ID.",
+        brakeMode: "Keeps the claw motor resisting motion when output is zero.",
+        closeVoltage: "Voltage applied while closing the claw around a game piece.",
+        openVoltage: "Voltage applied while opening the claw.",
+        holdVoltage: "Small holding voltage used to keep a gripped game piece secure.",
+        stallDetection: "Current and time thresholds used to detect when the claw has gripped something.",
+        beamBreak: "DIO port for a beam break sensor used to detect a held game piece.",
+        followerCanId: "CAN ID for the optional follower motor on the claw.",
+        followerOppose: "Makes the follower spin opposite the main motor when the claw linkage needs it."
+      },
+      PneumaticMechanism: {
+        solenoidType: "Choose single solenoid or double solenoid mode.",
+        moduleType: "Select the pneumatics control module type used on the robot.",
+        forwardChannel: "Forward channel number for a double solenoid.",
+        reverseChannel: "Reverse channel number for a double solenoid.",
+        singleChannel: "Channel number for a single solenoid.",
+        compressor: "Attach a compressor object so Catalyst can read pressure-related status.",
+        requirePressureAbove: "Minimum pressure required before the mechanism is allowed to actuate."
+      },
+      WinchMechanism: {
+        motor: "Main winch motor CAN ID.",
+        secondMotor: "Optional second winch motor CAN ID for dual-motor climbers.",
+        secondInverted: "Flips the optional second motor direction if needed.",
+        spoolRadius: "Spool radius in meters used to convert rotations into linear climb travel.",
+        extendSpeed: "Percent output used while extending the winch.",
+        retractSpeed: "Percent output used while retracting the winch."
+      },
+      DifferentialWristMechanism: {
+        leftMotor: "Left motor CAN ID for the differential wrist.",
+        rightMotor: "Right motor CAN ID for the differential wrist.",
+        leftInverted: "Flips the left motor direction if needed.",
+        rightInverted: "Flips the right motor direction if needed.",
+        pitchRange: "Allowed pitch travel in degrees. Enter minimum first, then maximum.",
+        rollRange: "Allowed roll travel in degrees. Enter minimum first, then maximum.",
+        tolerance: "Allowed angle error in degrees before the wrist is considered at target.",
+        presetName: "Name of a saved wrist pose, like STOW or SCORE.",
+        presetPitch: "Pitch angle in degrees for this saved wrist pose.",
+        presetRoll: "Roll angle in degrees for this saved wrist pose."
+      }
+    };
+
+    const motorSpecs = {
+      "MotorType.KRAKEN_X60": { label: "Kraken X60", stallTorqueNm: 7.09, freeSpeedRpm: 6000, nominalVoltage: 12 },
+      "MotorType.KRAKEN_X60_FOC": { label: "Kraken X60 FOC", stallTorqueNm: 9.37, freeSpeedRpm: 5800, nominalVoltage: 12 },
+      "MotorType.KRAKEN_X44": { label: "Kraken X44", stallTorqueNm: 4.05, freeSpeedRpm: 7530, nominalVoltage: 12 },
+      "MotorType.KRAKEN_X44_FOC": { label: "Kraken X44 FOC", stallTorqueNm: 5.45, freeSpeedRpm: 7200, nominalVoltage: 12 },
+      "MotorType.FALCON_500": { label: "Falcon 500", stallTorqueNm: 4.69, freeSpeedRpm: 6380, nominalVoltage: 12 },
+      "MotorType.FALCON_500_FOC": { label: "Falcon 500 FOC", stallTorqueNm: 5.84, freeSpeedRpm: 6080, nominalVoltage: 12 }
+    };
+
+    const estimatorProfile = { pidVolts: 3.0, damping: 0.85 };
+
     const state = {
       presets: [],
-      followers: []
+      followers: [],
+      lastEstimate: null
     };
 
     function num(id, label, value, method, placeholder) {
@@ -682,6 +1004,36 @@
 
     function escapeJava(value) {
       return String(value).replaceAll("\\", "\\\\").replaceAll("\"", "\\\"");
+    }
+
+    function getFieldHelp(def, id) {
+      return fieldHelp[def.label]?.[id] || fieldHelp.common[id] || "Explains what this field controls in the generated builder call.";
+    }
+
+    function renderLabel(label, help, forId = "") {
+      const attr = forId ? ` for="${forId}"` : "";
+      return `<label class="label-row"${attr}>${escapeHtml(label)} <span class="help-chip" tabindex="0" data-help="${escapeHtml(help)}">?</span></label>`;
+    }
+
+    function renderHeaderCell(label, help) {
+      return `<span class="label-row">${escapeHtml(label)} <span class="help-chip" tabindex="0" data-help="${escapeHtml(help)}">?</span></span>`;
+    }
+
+    function supportsGainEstimator(def) {
+      const ids = def.fields.map((field) => field.id);
+      return ids.includes("pid") && ids.includes("feedforward");
+    }
+
+    function renderGainLabel(def, field) {
+      const label = renderLabel(field.label, getFieldHelp(def, field.id));
+      if (!supportsGainEstimator(def) || !["pid", "feedforward"].includes(field.id)) {
+        return label;
+      }
+      return `
+        <div class="field-action">
+          ${label}
+          <button type="button" class="ghost mini-btn" data-estimate-gains="${field.id}">Estimate</button>
+        </div>`;
     }
 
     function javaValue(value) {
@@ -746,7 +1098,7 @@
             <div class="field">
               <div class="check">
                 <input id="${field.id}" data-field="${field.id}" type="checkbox" ${field.value ? "checked" : ""}>
-                <label for="${field.id}">${field.label}</label>
+                ${renderLabel(field.label, getFieldHelp(def, field.id), field.id)}
               </div>
             </div>`;
         }
@@ -758,7 +1110,7 @@
           }).join("");
           return `
             <div class="field">
-              <label for="${field.id}">${field.label}</label>
+              ${renderLabel(field.label, getFieldHelp(def, field.id), field.id)}
               <select id="${field.id}" data-field="${field.id}">${options}</select>
             </div>`;
         }
@@ -766,7 +1118,7 @@
         if (field.type === "pair") {
           return `
             <div class="field full">
-              <label>${field.label}</label>
+              ${renderLabel(field.label, getFieldHelp(def, field.id))}
               <div class="grid">
                 <input data-field="${field.id}A" value="${field.value[0]}" placeholder="${field.labels[0]}">
                 <input data-field="${field.id}B" value="${field.value[1]}" placeholder="${field.labels[1]}">
@@ -777,7 +1129,7 @@
         if (field.type === "triple") {
           return `
             <div class="field full">
-              <label>${field.label}</label>
+              ${renderGainLabel(def, field)}
               <div class="grid">
                 <input data-field="${field.id}A" value="${field.value[0]}" placeholder="${field.labels[0]}">
                 <input data-field="${field.id}B" value="${field.value[1]}" placeholder="${field.labels[1]}">
@@ -789,7 +1141,7 @@
         const placeholder = field.placeholder ? ` placeholder="${escapeHtml(field.placeholder)}"` : "";
         return `
           <div class="field">
-            <label for="${field.id}">${field.label}</label>
+            ${renderLabel(field.label, getFieldHelp(def, field.id), field.id)}
             <input id="${field.id}" data-field="${field.id}" value="${escapeHtml(field.value)}"${placeholder}>
           </div>`;
       }).join("");
@@ -800,24 +1152,37 @@
       const section = byId("presetSection");
       if (def.presetMode === "none") {
         section.style.display = "none";
+        byId("presets").innerHTML = "";
         return;
       }
       section.style.display = "";
       byId("presetHint").textContent = def.presetHint;
-      byId("presets").innerHTML = state.presets.map((preset, index) => {
+      const header = def.presetMode === "dual"
+        ? `<div class="row-head preset-row">
+            ${renderHeaderCell("Name", getFieldHelp(def, "presetName"))}
+            ${renderHeaderCell("Pitch", getFieldHelp(def, "presetPitch"))}
+            ${renderHeaderCell("Roll", getFieldHelp(def, "presetRoll"))}
+            <span></span>
+          </div>`
+        : `<div class="row-head preset-row single">
+            ${renderHeaderCell("Name", getFieldHelp(def, "presetName"))}
+            ${renderHeaderCell("Value", getFieldHelp(def, "presetValue"))}
+            <span></span>
+          </div>`;
+      byId("presets").innerHTML = header + state.presets.map((preset, index) => {
         if (def.presetMode === "dual") {
           return `
             <div class="preset-row" data-preset="${index}">
-              <input data-preset-field="name" value="${escapeHtml(preset.name)}" placeholder="Name">
-              <input data-preset-field="pitch" value="${escapeHtml(preset.pitch)}" placeholder="Pitch">
-              <input data-preset-field="roll" value="${escapeHtml(preset.roll)}" placeholder="Roll">
+              <input data-preset-field="name" value="${escapeHtml(preset.name)}" placeholder="Name" title="${escapeHtml(getFieldHelp(def, "presetName"))}">
+              <input data-preset-field="pitch" value="${escapeHtml(preset.pitch)}" placeholder="Pitch" title="${escapeHtml(getFieldHelp(def, "presetPitch"))}">
+              <input data-preset-field="roll" value="${escapeHtml(preset.roll)}" placeholder="Roll" title="${escapeHtml(getFieldHelp(def, "presetRoll"))}">
               <button type="button" class="danger" data-remove-preset="${index}" aria-label="Remove preset">X</button>
             </div>`;
         }
         return `
           <div class="preset-row single" data-preset="${index}">
-            <input data-preset-field="name" value="${escapeHtml(preset.name)}" placeholder="Name">
-            <input data-preset-field="value" value="${escapeHtml(preset.value)}" placeholder="Value">
+            <input data-preset-field="name" value="${escapeHtml(preset.name)}" placeholder="Name" title="${escapeHtml(getFieldHelp(def, "presetName"))}">
+            <input data-preset-field="value" value="${escapeHtml(preset.value)}" placeholder="Value" title="${escapeHtml(getFieldHelp(def, "presetValue"))}">
             <button type="button" class="danger" data-remove-preset="${index}" aria-label="Remove preset">X</button>
           </div>`;
       }).join("");
@@ -826,6 +1191,7 @@
     function syncPresetState() {
       document.querySelectorAll("[data-preset]").forEach((row) => {
         const index = Number(row.dataset.preset);
+        if (!state.presets[index]) return;
         row.querySelectorAll("[data-preset-field]").forEach((input) => {
           state.presets[index][input.dataset.presetField] = input.value;
         });
@@ -836,17 +1202,23 @@
       const section = byId("followerSection");
       if (!def.supportsFollowers) {
         section.style.display = "none";
+        byId("followers").innerHTML = "";
         return;
       }
       section.style.display = "";
       byId("followerHint").textContent = def.followerHint || "";
       byId("addFollower").disabled = def.multipleFollowers === false && state.followers.length >= 1;
-      byId("followers").innerHTML = state.followers.map((follower, index) => `
+      const header = `<div class="row-head preset-row single">
+          ${renderHeaderCell("CAN ID", getFieldHelp(def, "followerCanId"))}
+          ${renderHeaderCell("Oppose", getFieldHelp(def, "followerOppose"))}
+          <span></span>
+        </div>`;
+      byId("followers").innerHTML = header + state.followers.map((follower, index) => `
         <div class="preset-row single" data-follower="${index}">
-          <input data-follower-field="canId" value="${escapeHtml(follower.canId)}" placeholder="CAN ID">
+          <input data-follower-field="canId" value="${escapeHtml(follower.canId)}" placeholder="CAN ID" title="${escapeHtml(getFieldHelp(def, "followerCanId"))}">
           <div class="check">
             <input id="followerOppose${index}" data-follower-field="oppose" type="checkbox" ${follower.oppose ? "checked" : ""}>
-            <label for="followerOppose${index}">Oppose</label>
+            ${renderLabel("Oppose", getFieldHelp(def, "followerOppose"), `followerOppose${index}`)}
           </div>
           <button type="button" class="danger" data-remove-follower="${index}" aria-label="Remove follower">X</button>
         </div>
@@ -856,6 +1228,7 @@
     function syncFollowerState() {
       document.querySelectorAll("[data-follower]").forEach((row) => {
         const index = Number(row.dataset.follower);
+        if (!state.followers[index]) return;
         row.querySelectorAll("[data-follower-field]").forEach((input) => {
           state.followers[index][input.dataset.followerField] = input.type === "checkbox"
             ? input.checked
@@ -876,6 +1249,284 @@
       renderPresets(def);
       renderFollowers(def);
       generate();
+    }
+
+    function numberOr(value, fallback) {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : fallback;
+    }
+
+    function positiveOr(value, fallback) {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(Math.max(value, min), max);
+    }
+
+    function formatGain(value) {
+      if (!Number.isFinite(value)) return "0";
+      if (Math.abs(value) >= 100) return value.toFixed(2).replace(/\.?0+$/, "");
+      if (Math.abs(value) >= 10) return value.toFixed(3).replace(/\.?0+$/, "");
+      if (Math.abs(value) >= 1) return value.toFixed(4).replace(/\.?0+$/, "");
+      return value.toFixed(5).replace(/\.?0+$/, "");
+    }
+
+    function selectedMotorSpec(values) {
+      return motorSpecs[values.motorType] || motorSpecs["MotorType.KRAKEN_X60"];
+    }
+
+    function configuredMotorCount(key, values) {
+      if (key === "flywheel" || key === "diffwrist") return 1;
+      if (key === "linear" || key === "rotational") {
+        const followerCount = state.followers.filter((follower) => javaValue(follower.canId)).length;
+        return Math.max(1, 1 + followerCount);
+      }
+      return 1;
+    }
+
+    function freeMechanismRps(key, values, spec) {
+      const gearRatio = positiveOr(values.gearRatio, 1);
+      return (spec.freeSpeedRpm / 60) / gearRatio;
+    }
+
+    function accelerationRps2(key, values, spec, extraInertia, motorCount) {
+      const gearRatio = positiveOr(values.gearRatio, 1);
+      const outputTorque = spec.stallTorqueNm * gearRatio * motorCount;
+
+      if (key === "linear") {
+        const mass = positiveOr(values.mass, 5);
+        const radius = positiveOr(values.drumRadius, 0.0254);
+        const stages = positiveOr(values.stages, 1);
+        const linearAccel = (outputTorque * stages / radius) / mass;
+        return linearAccel / (2 * Math.PI * radius * stages);
+      }
+
+      if (key === "rotational") {
+        const length = positiveOr(values.length, 0.45);
+        const mass = positiveOr(values.mass, 4);
+        const moi = positiveOr(extraInertia, positiveOr(values.moi, mass * length * length / 3));
+        return (outputTorque / moi) / (2 * Math.PI);
+      }
+
+      if (key === "flywheel") {
+        const moi = positiveOr(extraInertia, positiveOr(values.moi, 0.003));
+        return (outputTorque / moi) / (2 * Math.PI);
+      }
+
+      if (key === "diffwrist") {
+        const moi = positiveOr(extraInertia, 0.002);
+        return (outputTorque / moi) / (2 * Math.PI);
+      }
+
+      return 0;
+    }
+
+    function gravityVolts(key, values, spec, motorCount) {
+      const gearRatio = positiveOr(values.gearRatio, 1);
+
+      if (key === "linear") {
+        const mass = positiveOr(values.mass, 5);
+        const radius = positiveOr(values.drumRadius, 0.0254);
+        const stages = positiveOr(values.stages, 1);
+        const loadTorque = mass * 9.81 * radius / stages;
+        return (loadTorque / (gearRatio * motorCount * spec.stallTorqueNm)) * spec.nominalVoltage;
+      }
+
+      if (key === "rotational" && values.useCosineGravity) {
+        const mass = positiveOr(values.mass, 4);
+        const length = positiveOr(values.length, 0.45);
+        const loadTorque = mass * 9.81 * length;
+        return (loadTorque / (gearRatio * motorCount * spec.stallTorqueNm)) * spec.nominalVoltage;
+      }
+
+      return 0;
+    }
+
+    function estimatorUnits(key) {
+      if (key === "linear") {
+        return {
+          errorLabel: "Full correction error meters",
+          velocityLabel: "Measured max velocity rotations/s",
+          accelerationLabel: "Measured max acceleration rotations/s^2",
+          hint: "Linear PID is estimated from meters, then converted to the drum rotations Catalyst sends to Motion Magic."
+        };
+      }
+      if (key === "rotational") {
+        return {
+          errorLabel: "Full correction error degrees",
+          velocityLabel: "Measured max velocity rotations/s",
+          accelerationLabel: "Measured max acceleration rotations/s^2",
+          hint: "Rotational PID uses mechanism rotations internally; enter the correction error in degrees."
+        };
+      }
+      if (key === "flywheel") {
+        return {
+          errorLabel: "Full correction error RPS",
+          velocityLabel: "Measured max velocity RPS",
+          accelerationLabel: "Measured max acceleration RPS/s",
+          hint: "Flywheel PID is velocity based, so the correction error is a velocity error in rotations per second."
+        };
+      }
+      return {
+        errorLabel: "Full correction error degrees",
+        velocityLabel: "Measured max velocity rotations/s",
+        accelerationLabel: "Measured max acceleration rotations/s^2",
+        hint: "Differential wrist gains are shared by the left and right motors, so these are only a rough first tune."
+      };
+    }
+
+    function defaultCorrectionError(key, values) {
+      if (key === "linear") return Math.max(positiveOr(values.positionTolerance, 0.02) * 4, 0.08);
+      if (key === "rotational") return Math.max(positiveOr(values.tolerance, 2) * 6, 15);
+      if (key === "flywheel") return Math.max(positiveOr(values.velocityTolerance, 3) * 4, 15);
+      if (key === "diffwrist") return Math.max(positiveOr(values.tolerance, 2) * 6, 12);
+      return 1;
+    }
+
+    function correctionErrorToControlUnits(key, values, error) {
+      if (key === "linear") {
+        const radius = positiveOr(values.drumRadius, 0.0254);
+        const stages = positiveOr(values.stages, 1);
+        return error / (2 * Math.PI * radius * stages);
+      }
+      if (key === "rotational" || key === "diffwrist") return error / 360;
+      return error;
+    }
+
+    function calculateGainEstimate() {
+      const key = byId("mechanism").value;
+      const def = definitions[key];
+      const values = readValues();
+      const spec = selectedMotorSpec(values);
+      const motorCount = configuredMotorCount(key, values);
+      const profile = estimatorProfile;
+      const maxVoltage = positiveOr(byId("estimateMaxVoltage").value, 12);
+      const kS = clamp(numberOr(byId("estimateStaticFriction").value, 0.18), 0, maxVoltage * 0.7);
+      const error = positiveOr(byId("estimateCorrectionError").value, defaultCorrectionError(key, values));
+      const measuredVelocity = positiveOr(byId("estimateMeasuredVelocity").value, 0);
+      const measuredAcceleration = positiveOr(byId("estimateMeasuredAcceleration").value, 0);
+      const extraInertia = positiveOr(byId("estimateExtraInertia").value, 0);
+      const freeRps = measuredVelocity || freeMechanismRps(key, values, spec);
+      const maxAccelRps2 = measuredAcceleration || accelerationRps2(key, values, spec, extraInertia, motorCount);
+      const kG = clamp(gravityVolts(key, values, spec, motorCount), 0, maxVoltage * 0.95);
+      const usableVelocityVolts = Math.max(0.1, maxVoltage - kS);
+      const usableAccelVolts = Math.max(0.1, maxVoltage - kS - (key === "linear" ? kG : 0));
+      const kV = usableVelocityVolts / Math.max(freeRps, 0.001);
+      const kA = maxAccelRps2 > 0 ? usableAccelVolts / maxAccelRps2 : 0;
+      const errorControlUnits = Math.max(correctionErrorToControlUnits(key, values, error), 0.0001);
+      const correctionVolts = Math.min(profile.pidVolts, maxVoltage * 0.5);
+      const kP = correctionVolts / errorControlUnits;
+      const rawKD = key === "flywheel" ? 0 : 2 * profile.damping * Math.sqrt(Math.max(kP * kA, 0));
+      const kD = key === "flywheel" ? 0 : Math.min(rawKD, kP * 0.08);
+      const warnings = [];
+
+      if (!values.motorType && key !== "diffwrist") {
+        warnings.push("Motor type was blank, so Kraken X60 specs were used.");
+      }
+      if (!measuredVelocity) {
+        warnings.push(`kV used theoretical free speed for ${spec.label}; measured SysId data will be better.`);
+      }
+      if (!measuredAcceleration && key === "diffwrist" && !extraInertia) {
+        warnings.push("Differential wrist kA used a small default inertia. Add measured acceleration or load inertia before trusting it.");
+      }
+      if ((key === "linear" || key === "rotational") && kG > maxVoltage * 0.55) {
+        warnings.push("Gravity gain is high for the available voltage. Consider more reduction, less load, or more motors.");
+      }
+      if (key === "flywheel") {
+        warnings.push("Flywheel derivative gain is left at 0 because velocity loops usually tune cleaner with kP plus feedforward.");
+      }
+
+      state.lastEstimate = {
+        def,
+        gains: {
+          kP: formatGain(kP),
+          kI: "0",
+          kD: formatGain(kD),
+          kS: formatGain(kS),
+          kV: formatGain(kV),
+          kA: formatGain(kA),
+          kG: formatGain(kG)
+        },
+        warnings,
+        summary: {
+          motor: spec.label,
+          motorCount,
+          freeRps,
+          maxAccelRps2,
+          error,
+          correctionVolts
+        }
+      };
+
+      renderGainEstimate();
+      return state.lastEstimate;
+    }
+
+    function renderGainEstimate() {
+      const estimate = state.lastEstimate;
+      if (!estimate) return;
+      const gravityLine = estimate.def.fields.some((field) => field.id === "gravityGain")
+        ? `<li><strong>Gravity:</strong> ${estimate.gains.kG}</li>`
+        : "";
+      const warningLines = estimate.warnings.length
+        ? `<div><strong>Checks:</strong><ul>${estimate.warnings.map((warning) => `<li>${escapeHtml(warning)}</li>`).join("")}</ul></div>`
+        : "";
+      byId("gainEstimateResult").innerHTML = `
+        <div><strong>Estimated gains:</strong></div>
+        <ul>
+          <li><strong>PID:</strong> ${estimate.gains.kP}, ${estimate.gains.kI}, ${estimate.gains.kD}</li>
+          <li><strong>FF:</strong> ${estimate.gains.kS}, ${estimate.gains.kV}, ${estimate.gains.kA}</li>
+          ${gravityLine}
+        </ul>
+        <div>
+          Based on ${escapeHtml(estimate.summary.motor)}, ${estimate.summary.motorCount} motor(s),
+          ${formatGain(estimate.summary.freeRps)} rotations/s free speed, and
+          ${formatGain(estimate.summary.maxAccelRps2)} rotations/s^2 acceleration.
+        </div>
+        ${warningLines}`;
+    }
+
+    function openGainEstimator() {
+      const key = byId("mechanism").value;
+      const values = readValues();
+      const units = estimatorUnits(key);
+      byId("gainDialogTitle").textContent = `Estimate gains for ${definitions[key].label}`;
+      byId("gainDialogHint").textContent = `${units.hint} These values are starting points; confirm on blocks and tune on the real robot.`;
+      byId("estimateCorrectionErrorLabel").textContent = units.errorLabel;
+      byId("estimateVelocityLabel").textContent = units.velocityLabel;
+      byId("estimateAccelerationLabel").textContent = units.accelerationLabel;
+      byId("estimateCorrectionError").value = formatGain(defaultCorrectionError(key, values));
+      byId("estimateMeasuredVelocity").value = "";
+      byId("estimateMeasuredAcceleration").value = "";
+      byId("estimateExtraInertia").value = "";
+      byId("estimateStaticFriction").value = "0.18";
+      byId("estimateMaxVoltage").value = "12";
+      state.lastEstimate = null;
+      byId("gainEstimateResult").textContent = "Enter any measurements you have, then calculate a starting point.";
+      byId("gainDialog").showModal();
+      calculateGainEstimate();
+    }
+
+    function setDataFieldValue(name, value) {
+      const input = document.querySelector(`[data-field="${name}"]`);
+      if (input) input.value = value;
+    }
+
+    function applyGainEstimate() {
+      const estimate = state.lastEstimate || calculateGainEstimate();
+      setDataFieldValue("pidA", estimate.gains.kP);
+      setDataFieldValue("pidB", estimate.gains.kI);
+      setDataFieldValue("pidC", estimate.gains.kD);
+      setDataFieldValue("feedforwardA", estimate.gains.kS);
+      setDataFieldValue("feedforwardB", estimate.gains.kV);
+      setDataFieldValue("feedforwardC", estimate.gains.kA);
+      if (estimate.def.fields.some((field) => field.id === "gravityGain")) {
+        setDataFieldValue("gravityGain", estimate.gains.kG);
+      }
+      generate();
+      byId("gainDialog").close();
     }
 
     function collectBuilderLines(def, values) {
@@ -987,9 +1638,23 @@ ${builderLines}
       byId("mechanism").addEventListener("change", (event) => setMechanism(event.target.value));
       byId("configForm").addEventListener("input", generate);
       byId("configForm").addEventListener("change", generate);
+      byId("configForm").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-estimate-gains]");
+        if (!button) return;
+        openGainEstimator();
+      });
       byId("catalystName").addEventListener("input", () => {
         byId("variableName").value = toVariableName(byId("catalystName").value);
         generate();
+      });
+
+      byId("calculateEstimatedGains").addEventListener("click", calculateGainEstimate);
+      byId("applyEstimatedGains").addEventListener("click", applyGainEstimate);
+      byId("gainDialog").addEventListener("input", () => {
+        if (state.lastEstimate) calculateGainEstimate();
+      });
+      byId("gainDialog").addEventListener("change", () => {
+        if (state.lastEstimate) calculateGainEstimate();
       });
 
       byId("addPreset").addEventListener("click", () => {
