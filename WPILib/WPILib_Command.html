@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WPILib Commands</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #e0e0e0;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        p {
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+        }
+        a {
+            color: #4da6ff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #99ccff;
+            text-decoration: underline;
+        }
+        ul, ol {
+            display: inline-block;
+            text-align: left;
+            background-color: #1a1a1a;
+            padding: 20px 40px;
+            margin: 10px auto 30px auto;
+            border-radius: 8px;
+            border: 1px solid #333;
+            max-width: 800px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background: #333;
+            margin: 40px auto;
+            width: 70%;
+        }
+        code {
+            background-color: #1a1a1a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #ffb86c;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            max-width: 800px;
+            margin: 50px auto 0 auto;
+        }
+        .nav-links a {
+            padding: 8px 15px;
+            background-color: #333;
+            border-radius: 5px;
+        }
+        .nav-links a:hover {
+            background-color: #4da6ff;
+            color: #000;
+            text-decoration: none;
+        }
+    </style>
+    <script src="../sidebar.js" defer></script>
+</head>
+<body>
+
+    <h1>Commands: The Robot's Instructions</h1>
+
+    <p>If Subsystems are the body parts, <strong>Commands</strong> are the brain or the instructions. A command tells a subsystem exactly what to do and for how long.</p>
+
+    <hr>
+
+    <h3>The Lifecycle of a Command</h3>
+    <p>Every command follows a specific state machine. When a command runs, WPILib calls these four methods:</p>
+    <ol>
+        <li><strong>initialize():</strong> Called once when the command starts. Use this to reset sensors or set initial states.</li>
+        <li><strong>execute():</strong> Called repeatedly every 20ms while the command is running. This is where you tell the motors to move.</li>
+        <li><strong>isFinished():</strong> A true or false check. If it returns <code>true</code>, the command stops.</li>
+        <li><strong>end(boolean interrupted):</strong> Called once when the command stops. Use this to turn off motors for safety.</li>
+    </ol>
+
+    <hr>
+
+    <h3>Examples of Commands</h3>
+    <ul>
+        <li><strong>InstantCommand:</strong> A quick action like opening a claw. It starts, does the action, and ends immediately.</li>
+        <li><strong>RunCommand:</strong> A continuous action like driving with a joystick. It runs until the match ends or it is interrupted.</li>
+        <li><strong>SequentialCommandGroup:</strong> A list of commands to run one after another, such as raise arm and then open claw.</li>
+    </ul>
+
+    <hr>
+
+    <h3>Requirements</h3>
+    <p>When you create a command, you must tell it which Subsystems it needs.</p>
+    <p>If a <code>DriveForward</code> command is running, and you start a <code>TeleopDrive</code> command, WPILib will automatically stop the first one because they both require the DriveTrain subsystem. This prevents motors from getting conflicting instructions.</p>
+
+    <hr>
+
+    <h3>Summary</h3>
+    <ul>
+        <li><strong>Subsystem:</strong> I am the arm. I have a motor. I can move up or down.</li>
+        <li><strong>Command:</strong> I want the arm to move up for 2 seconds and then stop.</li>
+    </ul>
+
+    <div class="nav-links">
+        <a href="WPILib_Subsystem.html">Previous: Subsystems</a>
+        <a href="WPILib_CommandSchedulerAndRobotContainer.html">Next: Command Scheduler And RobotContainer</a>
+    </div>
+
+</body>
+</html>

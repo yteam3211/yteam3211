@@ -1,0 +1,136 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WPILib Learning Resources</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #e0e0e0;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        p {
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+        }
+        a {
+            color: #4da6ff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #99ccff;
+            text-decoration: underline;
+        }
+        ul, ol {
+            display: inline-block;
+            text-align: left;
+            background-color: #1a1a1a;
+            padding: 20px 40px;
+            margin: 10px auto 30px auto;
+            border-radius: 8px;
+            border: 1px solid #333;
+            max-width: 800px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background: #333;
+            margin: 40px auto;
+            width: 70%;
+        }
+        .task {
+            background-color: #1a1a1a;
+            border-left: 5px solid #4da6ff;
+            padding: 20px;
+            margin: 30px auto;
+            max-width: 700px;
+            text-align: left;
+            border-radius: 0 8px 8px 0;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            max-width: 800px;
+            margin: 50px auto 0 auto;
+        }
+        .nav-links a {
+            padding: 8px 15px;
+            background-color: #333;
+            border-radius: 5px;
+        }
+        .nav-links a:hover {
+            background-color: #4da6ff;
+            color: #000;
+            text-decoration: none;
+        }
+    </style>
+    <script src="../sidebar.js" defer></script>
+</head>
+<body>
+
+    <h1>WPILib Learning Resources</h1>
+
+    <p>Now that you have VS Code installed, it is time to look at the official documentation and video guides that will help you write your first lines of code.</p>
+
+    <hr>
+
+    <h3>Official Documentation: Your First Robot Project</h3>
+    <p>The WPILib documentation, often called "Docs", is the most important resource for any FRC programmer. Your first task is to read through the guide for creating a test drivetrain program.</p>
+
+    <div class="task">
+        <strong>Task:</strong> Go to the official guide and follow the steps for your preferred language: Java, C++, or Python.<br>
+        <a href="http://docs.wpilib.org/en/stable/docs/zero-to-robot/step-4/creating-test-drivetrain-program-cpp-java-python.html" target="_blank">Creating a Test Drivetrain Program</a>
+    </div>
+
+    <p><strong>What you will learn there:</strong></p>
+    <ul>
+        <li>How to create a new project from a template.</li>
+        <li>How to define motor controllers in your code.</li>
+        <li>How to use joystick inputs to drive a robot base.</li>
+    </ul>
+
+    <hr>
+
+    <h3>Video Series: Zero to Autonomous</h3>
+    <p>If you prefer watching a visual breakdown of how a robot is programmed from scratch, the <strong>Zero to Autonomous</strong> series is the gold standard for FRC beginners.</p>
+
+    <div class="task">
+        <strong>Task:</strong> Watch videos 1 through 6 in the Zero to Autonomous series.<br>
+        <a href="https://www.youtube.com/watch?v=ihO-mw_4Qpo" target="_blank">Zero to Autonomous Video Series</a>
+    </div>
+
+    <p><strong>Why watch this?</strong></p>
+    <ul>
+        <li>It explains the <strong>Command-Based</strong> framework, which we use.</li>
+        <li>It covers everything from basic driving to advanced autonomous path following.</li>
+        <li>It shows real-world examples of how the code interacts with a physical robot.</li>
+    </ul>
+
+    <hr>
+
+    <h3>Pro-Tip for New Programmers</h3>
+    <p>Do not worry if you do not understand every line of code yet. The goal right now is to see the <strong>structure</strong>: where the motors are defined, where the movement logic lives, and how the robot listens to your commands.</p>
+
+    <div class="nav-links">
+        <a href="WPILib_Introduction.html">Previous: Intro &amp; Installation</a>
+        <a href="WPILib_Subsystem.html">Next: Subsystems</a>
+    </div>
+
+</body>
+</html>

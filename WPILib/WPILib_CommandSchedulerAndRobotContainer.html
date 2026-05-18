@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RobotContainer and Command Scheduler</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #e0e0e0;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        p {
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+        }
+        a {
+            color: #4da6ff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #99ccff;
+            text-decoration: underline;
+        }
+        ul, ol {
+            display: inline-block;
+            text-align: left;
+            background-color: #1a1a1a;
+            padding: 20px 40px;
+            margin: 10px auto 30px auto;
+            border-radius: 8px;
+            border: 1px solid #333;
+            max-width: 800px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background: #333;
+            margin: 40px auto;
+            width: 70%;
+        }
+        pre {
+            background-color: #0d0d0d;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            color: #a6e22e;
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: auto;
+            text-align: left;
+            max-width: 900px;
+            margin: 10px auto 30px auto;
+        }
+        code {
+            background-color: #1a1a1a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #ffb86c;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        pre code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            max-width: 800px;
+            margin: 50px auto 0 auto;
+        }
+        .nav-links a {
+            padding: 8px 15px;
+            background-color: #333;
+            border-radius: 5px;
+        }
+        .nav-links a:hover {
+            background-color: #4da6ff;
+            color: #000;
+            text-decoration: none;
+        }
+    </style>
+    <script src="../sidebar.js" defer></script>
+</head>
+<body>
+
+    <h1>RobotContainer and the Command Scheduler</h1>
+
+    <p>In the Command-Based framework, we treat <strong>Subsystems</strong> as the body and <strong>Commands</strong> as the brain. To make them work together, we use two critical components: the <strong>CommandScheduler</strong> and the <strong>RobotContainer</strong>.</p>
+
+    <hr>
+
+    <h2>1. The Command Scheduler</h2>
+    <p>The <code>CommandScheduler</code> is a background process that runs automatically. You do not need to create it, but you must call it in <code>Robot.java</code>, usually inside <code>robotPeriodic</code>.</p>
+
+    <h3>What does it do?</h3>
+    <p>Every 20 milliseconds, the Scheduler:</p>
+    <ol>
+        <li><strong>Polls Buttons:</strong> It checks if any buttons on your controllers were pressed, released, or held.</li>
+        <li><strong>Updates Subsystems:</strong> It runs the <code>periodic()</code> method of every subsystem.</li>
+        <li><strong>Executes Commands:</strong> It runs the <code>execute()</code> methods of all active commands and checks if they are finished.</li>
+        <li><strong>Manages Interrupts:</strong> If a new command starts that requires a subsystem already in use, the Scheduler stops the old command to let the new one run.</li>
+    </ol>
+
+    <hr>
+
+    <h2>2. RobotContainer: The Blueprint</h2>
+    <p><code>RobotContainer.java</code> is where you define the shape of your robot's software. Instead of putting logic in <code>Robot.java</code>, you do it here.</p>
+
+    <h3>Responsibilities</h3>
+    <ul>
+        <li><strong>Creating Subsystems:</strong> Initializing your motors and sensors.</li>
+        <li><strong>Configuring Controllers:</strong> Defining <code>CommandXboxController</code> or <code>Joystick</code> objects.</li>
+        <li><strong>Binding Buttons:</strong> Mapping physical buttons to specific commands.</li>
+        <li><strong>Autonomous Selection:</strong> Choosing which command runs when the match starts.</li>
+    </ul>
+
+    <hr>
+
+    <h2>3. Example Implementation</h2>
+    <p>Here is how a standard <code>RobotContainer</code> looks:</p>
+
+    <pre><code>public class RobotContainer {
+  // 1. Define Subsystems
+  private final DriveSubsystem m_drive = new DriveSubsystem();
+  private final IntakeSubsystem m_intake = new IntakeSubsystem();
+
+  // 2. Define Controllers (Port 0 in Driver Station)
+  private final CommandPS5Controller m_driverController =
+      new CommandPS5Controller(0);
+
+  public RobotContainer() {
+    // 3. Set Default Commands
+    // The drivetrain should always be listening to the joysticks
+    m_drive.setDefaultCommand(
+        new RunCommand(() -> m_drive.arcadeDrive(
+            m_driverController.getLeftY(),
+            m_driverController.getRightX()), m_drive)
+    );
+
+    // 4. Bind Buttons
+    configureBindings();
+  }
+
+  private void configureBindings() {
+    // When circle is pressed, start intake. Stop when released.
+    m_driverController.circle().whileTrue(new IntakeCommand(m_intake));
+
+    // When square is pressed once, run a shoot command.
+    m_driverController.square().onTrue(new ShootCommand(m_shooter));
+  }
+
+  public Command getAutonomousCommand() {
+    // Return the command to run in autonomous.
+    return new AutoDriveCommand(m_drive);
+  }
+}</code></pre>
+
+    <div class="nav-links">
+        <a href="WPILib_Command.html">Previous: Commands</a>
+        <a href="../index.html">Next: Home</a>
+    </div>
+
+</body>
+</html>

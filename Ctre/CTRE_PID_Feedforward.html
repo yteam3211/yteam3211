@@ -1,0 +1,155 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTRE PID and Feedforward</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #e0e0e0;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        p {
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+        }
+        a {
+            color: #4da6ff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #99ccff;
+            text-decoration: underline;
+        }
+        ul, ol {
+            display: inline-block;
+            text-align: left;
+            background-color: #1a1a1a;
+            padding: 20px 40px;
+            margin: 10px auto 30px auto;
+            border-radius: 8px;
+            border: 1px solid #333;
+            max-width: 800px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background: #333;
+            margin: 40px auto;
+            width: 70%;
+        }
+        pre {
+            background-color: #0d0d0d;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            color: #a6e22e;
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: auto;
+            text-align: left;
+            max-width: 800px;
+            margin: 10px auto 30px auto;
+        }
+        code {
+            background-color: #1a1a1a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #ffb86c;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        pre code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            max-width: 800px;
+            margin: 50px auto 0 auto;
+        }
+        .nav-links a {
+            padding: 8px 15px;
+            background-color: #333;
+            border-radius: 5px;
+        }
+        .nav-links a:hover {
+            background-color: #4da6ff;
+            color: #000;
+            text-decoration: none;
+        }
+    </style>
+    <script src="../sidebar.js" defer></script>
+</head>
+<body>
+
+    <h1>CTRE TalonFX: PID and Feedforward (Phoenix 6)</h1>
+
+    <p>When using the TalonFX, we do not just tell the motor to run at 50% power. We often want to tell it to go to a <strong>specific speed</strong> or a <strong>specific angle</strong>. To do this accurately, we use <strong>PID</strong> and <strong>Feedforward</strong>.</p>
+
+    <p>The best part about Phoenix 6 is that these calculations happen on the motor controller at <strong>1000Hz</strong>, making the robot smoother and more responsive.</p>
+
+    <hr>
+
+    <h2>1. Feedforward (The Best Guess)</h2>
+    <p>Feedforward is the open-loop part of control. It calculates how much voltage is needed to overcome physics before we even look at the error.</p>
+
+    <h3>Key Constants in Phoenix 6</h3>
+    <ul>
+        <li><strong>kS (Static):</strong> The voltage needed just to overcome friction. If your motor hums but does not move, your kS is too low.</li>
+        <li><strong>kV (Velocity):</strong> The voltage needed to maintain a constant speed. This is the most important for shooters.</li>
+        <li><strong>kA (Acceleration):</strong> The voltage needed to reach a certain speed quickly.</li>
+        <li><strong>kG (Gravity):</strong> Used only for arms and elevators. It provides constant power to keep the mechanism from falling down due to gravity.</li>
+    </ul>
+
+    <hr>
+
+    <h2>2. PID (The Correction)</h2>
+    <p>While Feedforward gets you close, PID uses the encoder to fix the remaining error.</p>
+    <ul>
+        <li><strong>kP (Proportional):</strong> The force. If you are far from the target, it pushes hard. If you are close, it pushes gently. Too high causes oscillation.</li>
+        <li><strong>kI (Integral):</strong> The memory. It adds up small errors over time to fix steady-state error. We rarely use this in FRC.</li>
+        <li><strong>kD (Derivative):</strong> The brake. It looks at how fast you are approaching the target and slows you down so you do not overshoot.</li>
+    </ul>
+
+    <hr>
+
+    <h2>3. Implementation Code</h2>
+    <p>To set these up, we use <code>Slot0Configs</code>. This allows you to have different slots for different gain sets.</p>
+
+    <pre><code>// 1. Create the configuration object
+var slot0Configs = new Slot0Configs();
+
+// 2. Set the gains
+slot0Configs.kP = 0.11; // An example value
+slot0Configs.kI = 0.0;
+slot0Configs.kD = 0.01;
+slot0Configs.kS = 0.24; // Volts to break friction
+slot0Configs.kV = 0.12; // Volts per rotation per second
+
+// 3. Apply the configs to the motor
+m_talonFX.getConfigurator().apply(slot0Configs);</code></pre>
+
+    <div class="nav-links">
+        <a href="CTRE_PID.html">Previous: CTRE PID</a>
+        <a href="../WPILib/WPILib_CommandSchedulerAndRobotContainer.html">Next: Command Scheduler And RobotContainer</a>
+    </div>
+
+</body>
+</html>

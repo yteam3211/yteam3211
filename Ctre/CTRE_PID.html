@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTRE TalonFX PID Control</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #e0e0e0;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        p {
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+        }
+        a {
+            color: #4da6ff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #99ccff;
+            text-decoration: underline;
+        }
+        ul, ol {
+            display: inline-block;
+            text-align: left;
+            background-color: #1a1a1a;
+            padding: 20px 40px;
+            margin: 10px auto 30px auto;
+            border-radius: 8px;
+            border: 1px solid #333;
+            max-width: 800px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background: #333;
+            margin: 40px auto;
+            width: 70%;
+        }
+        pre {
+            background-color: #0d0d0d;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            color: #a6e22e;
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: auto;
+            text-align: left;
+            max-width: 800px;
+            margin: 10px auto 30px auto;
+        }
+        code {
+            background-color: #1a1a1a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #ffb86c;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        pre code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
+        }
+        blockquote {
+            background-color: #1a1a1a;
+            border-left: 5px solid #f39c12;
+            padding: 20px;
+            margin: 30px auto;
+            max-width: 700px;
+            text-align: left;
+            border-radius: 0 8px 8px 0;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            max-width: 800px;
+            margin: 50px auto 0 auto;
+        }
+        .nav-links a {
+            padding: 8px 15px;
+            background-color: #333;
+            border-radius: 5px;
+        }
+        .nav-links a:hover {
+            background-color: #4da6ff;
+            color: #000;
+            text-decoration: none;
+        }
+    </style>
+    <script src="../sidebar.js" defer></script>
+</head>
+<body>
+
+    <h1>CTRE TalonFX: PID Control (Phoenix 6)</h1>
+
+    <p>While <strong>Feedforward</strong> handles the physics you already know, like friction and gravity, <strong>PID</strong> is the correction system. It looks at the difference between where the motor is and where you want it to be, then applies power to fix the error.</p>
+
+    <p>On the TalonFX, this PID loop runs inside the motor controller hardware at <strong>1000Hz</strong>, which is much faster and smoother than running it in your robot code.</p>
+
+    <hr>
+
+    <h2>1. What is PID?</h2>
+
+    <h3>P: Proportional (The Force)</h3>
+    <p>This is the most important part. The output is proportional to the current error.</p>
+    <ul>
+        <li><strong>Far from target:</strong> High power.</li>
+        <li><strong>Close to target:</strong> Low power.</li>
+        <li><strong>Tuning:</strong> If <strong>kP</strong> is too high, the motor will overshoot and vibrate.</li>
+    </ul>
+
+    <h3>I: Integral (The Memory)</h3>
+    <p>It looks at the error over time. If the motor is stuck just before the target and cannot quite get there due to friction, the <strong>I</strong> term builds up energy over time to give it a final push.</p>
+    <p><strong>Note:</strong> In FRC, we rarely use <strong>kI</strong> because a good Feedforward usually solves the friction problem better.</p>
+
+    <h3>D: Derivative (The Brake)</h3>
+    <p>It looks at how fast the error is changing. If the motor is approaching the target very quickly, the <strong>D</strong> term applies a braking force to prevent an overshoot.</p>
+    <p><strong>Benefit:</strong> It allows you to have a higher <strong>kP</strong> for a faster response while keeping the movement smooth.</p>
+
+    <hr>
+
+    <h2>2. Setting Gains in Java</h2>
+    <p>In Phoenix 6, we apply these gains to a <code>Slot0Configs</code> object.</p>
+
+    <pre><code>var slot0 = new Slot0Configs();
+
+slot0.kP = 0.45; // Increase for more snap or strength
+slot0.kI = 0.0;  // Usually leave at 0.0
+slot0.kD = 0.02; // Increase to stop overshooting
+
+// Apply to the motor configurator
+m_talonFX.getConfigurator().apply(slot0);</code></pre>
+
+    <hr>
+
+    <h2>3. Position vs. Velocity PID</h2>
+    <p>You use the same gains, but the <strong>Control Request</strong> changes based on what you want the robot to do.</p>
+
+    <h3>Position Control (Arms, Elevators, Swerve Steering)</h3>
+    <p>Moves the motor to a specific rotation.</p>
+    <pre><code>// Move to 0.5 rotations (180 degrees if 1:1 gear ratio)
+m_talonFX.setControl(new PositionVoltage(0.5));</code></pre>
+
+    <h3>Velocity Control (Shooters, Drivetrain)</h3>
+    <p>Maintains a specific speed regardless of load, like a ball hitting the shooter.</p>
+    <pre><code>// Spin at 60 rotations per second (RPS)
+m_talonFX.setControl(new VelocityVoltage(60.0));</code></pre>
+
+    <hr>
+
+    <h2>4. How to Tune PID Safely</h2>
+    <ol>
+        <li><strong>Start at Zero:</strong> Set kP, kI, and kD to 0.0.</li>
+        <li><strong>Increase kP:</strong> Slowly increase the value until the mechanism starts to shake or hunt for the target, then cut that value in half.</li>
+        <li><strong>Add kD:</strong> If the mechanism overshoots the target before settling, add small amounts of kD until it stops smoothly on the target.</li>
+        <li><strong>Ignore kI:</strong> For most FRC mechanisms, you can leave this at 0.0.</li>
+    </ol>
+
+    <blockquote><strong>Safety first:</strong> Always have a teammate standing by the Spacebar (Disable) on the Driver Station when tuning PID for the first time.</blockquote>
+
+    <div class="nav-links">
+        <a href="CTRE_TalonFX.html">Previous: CTRE and TalonFX</a>
+        <a href="CTRE_PID_Feedforward.html">Next: PID and Feedforward</a>
+    </div>
+
+</body>
+</html>

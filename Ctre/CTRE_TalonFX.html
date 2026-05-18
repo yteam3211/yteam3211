@@ -1,0 +1,131 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTRE and TalonFX</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 {
+            color: #e0e0e0;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        p {
+            max-width: 800px;
+            margin: 0 auto 20px auto;
+        }
+        a {
+            color: #4da6ff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #99ccff;
+            text-decoration: underline;
+        }
+        ul, ol {
+            display: inline-block;
+            text-align: left;
+            background-color: #1a1a1a;
+            padding: 20px 40px;
+            margin: 10px auto 30px auto;
+            border-radius: 8px;
+            border: 1px solid #333;
+            max-width: 800px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background: #333;
+            margin: 40px auto;
+            width: 70%;
+        }
+        pre {
+            background-color: #0d0d0d;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            color: #a6e22e;
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: auto;
+            text-align: left;
+            max-width: 800px;
+            margin: 10px auto 30px auto;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            max-width: 800px;
+            margin: 50px auto 0 auto;
+        }
+        .nav-links a {
+            padding: 8px 15px;
+            background-color: #333;
+            border-radius: 5px;
+        }
+        .nav-links a:hover {
+            background-color: #4da6ff;
+            color: #000;
+            text-decoration: none;
+        }
+    </style>
+    <script src="../sidebar.js" defer></script>
+</head>
+<body>
+
+    <h1>CTRE and the TalonFX</h1>
+
+    <p>While WPILib provides the foundation, we use hardware from a vendor called <strong>CTRE</strong>, or Cross The Road Electronics. To control their motors, we use their specific library and hardware.</p>
+
+    <hr>
+
+    <h3>What is CTRE?</h3>
+    <p>CTRE is the company that manufactures the motor controllers and sensors we use most often. They provide a library called <a href="https://v6.docs.ctr-electronics.com/en/stable/" target="_blank">Phoenix 6</a> that integrates with WPILib, allowing us to communicate with their hardware.</p>
+
+    <h3>Installing CTRE</h3>
+    <p>To install CTRE Phoenix 6, go to the <a href="https://v6.docs.ctr-electronics.com/en/latest/docs/installation/installation-frc.html" target="_blank">Phoenix 6 FRC installation page</a> and follow the instructions.</p>
+
+    <h3>The TalonFX (Kraken X60 / Falcon 500)</h3>
+    <p>The <strong>TalonFX</strong> is the integrated motor controller found inside motors like the <strong>Kraken X60</strong> and the <strong>Falcon 500</strong>.</p>
+
+    <p><strong>Key Features:</strong></p>
+    <ul>
+        <li><strong>Integrated Controller:</strong> The brain of the motor is built directly into the back of the casing.</li>
+        <li><strong>CAN Bus Communication:</strong> It communicates with the roboRIO using a daisy-chained network called the CAN Bus.</li>
+        <li><strong>Built-in Encoder:</strong> It has a high-precision internal sensor that tracks exactly how many rotations the motor has completed.</li>
+    </ul>
+
+    <hr>
+
+    <h3>Basic Code Setup</h3>
+    <p>To use a TalonFX in our code, we first define it using its <strong>CAN ID</strong> and the <strong>CAN Bus</strong> name.</p>
+
+    <pre><code>// Defining a TalonFX motor with CAN ID 1 on the "rio" CAN Bus
+CANBus m_canbus = new CANBus("rio");
+
+TalonFX m_motor = new TalonFX(1, m_canbus);
+
+// Setting the motor to 50% power
+m_motor.setControl(new DutyCycleOut(0.5));</code></pre>
+
+    <div class="nav-links">
+        <a href="../index.html">Previous: Home</a>
+        <a href="CTRE_PID.html">Next: CTRE PID</a>
+    </div>
+
+</body>
+</html>
