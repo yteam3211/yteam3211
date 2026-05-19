@@ -46,6 +46,23 @@
         li {
             margin-bottom: 10px;
         }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            max-width: 800px;
+            margin: 50px auto 0 auto;
+        }
+        .nav-links a {
+            padding: 8px 15px;
+            background-color: #333;
+            border-radius: 5px;
+        }
+        .nav-links a:hover {
+            background-color: #4da6ff;
+            color: #000;
+            text-decoration: none;
+        }
     </style>
     <script src="../sidebar.js" defer></script>
 </head>
@@ -85,6 +102,11 @@
 
     <h3>GitHub Projects</h3>
     <p>We use <strong>GitHub Projects</strong> as a Kanban-style board to organize our workflow. It allows the team to see exactly what is "To Do," "In Progress," and "Done" by linking directly to the Issues and Pull Requests mentioned above.</p>
+
+    <div class="nav-links">
+        <a href="GitBasic.html">Previous: Git Start</a>
+        <a href="../WPILib/WPILib_Introduction.html">Next: WPILib Introduction</a>
+    </div>
 
 </body>
 </html>

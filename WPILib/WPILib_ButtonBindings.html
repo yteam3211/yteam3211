@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Bindings</title>
+    <link rel="stylesheet" href="../course.css">
+    <script src="../sidebar.js" defer></script>
+</head>
+<body>
+<main>
+    <h1>Button Bindings</h1>
+    <p>Button bindings connect driver input to commands. This is where joystick buttons, controller triggers, and default driving commands become real robot behavior.</p>
+
+    <h2>Common Binding Types</h2>
+    <ul>
+        <li><strong>whileTrue:</strong> Run a command while the button is held.</li>
+        <li><strong>onTrue:</strong> Start a command once when the button is pressed.</li>
+        <li><strong>toggleOnTrue:</strong> Toggle a command on and off with the same button.</li>
+        <li><strong>default command:</strong> The command a subsystem runs when nothing else is using it.</li>
+    </ul>
+
+    <pre><code>private void configureBindings() {
+    driverController.a().whileTrue(new IntakeCommand(intake));
+    driverController.b().onTrue(new ShootCommand(shooter));
+
+    drive.setDefaultCommand(
+        new ArcadeDriveCommand(
+            drive,
+            () -> -driverController.getLeftY(),
+            () -> driverController.getRightX()
+        )
+    );
+}</code></pre>
+
+    <section class="mission">
+        <h3>Mission</h3>
+        <p>Write down three driver actions for a robot and choose whether each one should use <code>whileTrue</code>, <code>onTrue</code>, or a default command.</p>
+    </section>
+
+    <div class="nav-links">
+        <a href="WPILib_CommandSchedulerAndRobotContainer.html">Previous: RobotContainer</a>
+        <a href="WPILib_Units.html">Next: WPILib Units</a>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Overview</title>
+    <link rel="stylesheet" href="../course.css">
+    <script src="../sidebar.js" defer></script>
+</head>
+<body>
+<main>
+    <h1>Simulation</h1>
+    <p>Simulation lets programmers test robot code without the robot. It will never replace real hardware testing, but it can catch command bugs, unit mistakes, missing requirements, and broken autonomous logic before anyone touches the robot.</p>
+    <p>The main idea is simple: your normal robot code commands motor voltage, and your simulation code uses that voltage to update fake sensors. Commands should not need to know whether the data came from a real motor controller or a simulated mechanism.</p>
+
+    <h2>What We Simulate</h2>
+    <ul>
+        <li><strong>Inputs:</strong> Driver controls, sensors, encoders, gyro, and game piece detection.</li>
+        <li><strong>Mechanisms:</strong> Flywheels, arms, elevators, drivetrains, and simple state machines.</li>
+        <li><strong>Outputs:</strong> Motor voltage, solenoid states, LEDs, and mechanism positions.</li>
+    </ul>
+
+    <h2>The Simulation Loop</h2>
+    <ol>
+        <li>Robot code calculates motor output.</li>
+        <li>The sim reads the voltage that would have gone to the motor.</li>
+        <li>A WPILib sim class updates the fake mechanism physics.</li>
+        <li>The sim writes fake sensor values back into the robot code.</li>
+        <li>Commands read those fake sensors just like real sensors.</li>
+    </ol>
+
+    <pre><code>@Override
+public void simulationPeriodic() {
+    // 1. Send motor voltage into the physics model.
+    mechanismSim.setInputVoltage(appliedVolts);
+
+    // 2. Advance the model by one robot loop.
+    mechanismSim.update(0.02);
+
+    // 3. Copy simulated position/velocity into sensor variables.
+    simulatedPosition = mechanismSim.getPosition();
+}</code></pre>
+
+    <hr>
+
+    <h2>Useful WPILib Simulation Classes</h2>
+    <ul>
+        <li><code>DCMotorSim</code> for a simple motor gearbox with position and velocity.</li>
+        <li><code>FlywheelSim</code> for shooters and spinning wheels.</li>
+        <li><code>SingleJointedArmSim</code> for arms.</li>
+        <li><code>ElevatorSim</code> for elevators.</li>
+    </ul>
+
+    <hr>
+
+    <h2>1. DCMotorSim</h2>
+    <p><code>DCMotorSim</code> is the general-purpose simulation for a motor attached to a mechanism. Use it when the mechanism is not specifically a flywheel, arm, elevator, or drivetrain.</p>
+    <p>It gives you angular position and angular velocity. This is useful for simple rollers, wheels, and test mechanisms.</p>
+
+    <pre><code>import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+
+private final DCMotorSim motorSim = new DCMotorSim(
+    LinearSystemId.createDCMotorSystem(
+        DCMotor.getKrakenX60(1),
+        0.01, // Moment of inertia, kg*m^2
+        5.0   // Gear ratio
+    ),
+    DCMotor.getKrakenX60(1)
+);
+
+public void simulationPeriodic() {
+    motorSim.setInputVoltage(appliedVolts);
+    motorSim.update(0.02);
+
+    double positionRadians = motorSim.getAngularPositionRad();
+    double velocityRadPerSec = motorSim.getAngularVelocityRadPerSec();
+}</code></pre>
+
+    <p><strong>What each part means:</strong></p>
+    <ul>
+        <li><code>DCMotor.getKrakenX60(1)</code> describes the motor model.</li>
+        <li><code>0.01</code> is the mechanism inertia. A bigger number accelerates more slowly.</li>
+        <li><code>5.0</code> is the gear ratio. Higher gearing changes speed and torque behavior.</li>
+        <li><code>setInputVoltage</code> is how your simulated motor output enters the physics model.</li>
+        <li><code>update(0.02)</code> advances the model by one normal 20 ms robot loop.</li>
+    </ul>
+
+    <h2>2. FlywheelSim</h2>
+    <p><code>FlywheelSim</code> is for mechanisms where the main thing you care about is speed. Shooters are the classic example.</p>
+
+    <pre><code>import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.simulation.FlywheelSim;
+
+private final FlywheelSim shooterSim = new FlywheelSim(
+    DCMotor.getKrakenX60(1),
+    1.5,  // Gear ratio
+    0.02  // Moment of inertia, kg*m^2
+);
+
+public void simulationPeriodic() {
+    shooterSim.setInputVoltage(shooterVolts);
+    shooterSim.update(0.02);
+
+    double shooterVelocityRadPerSec =
+        shooterSim.getAngularVelocityRadPerSec();
+}</code></pre>
+
+    <p><strong>How to think about it:</strong> a flywheel does not need a "position goal" most of the time. It needs to reach and hold a velocity. Feedforward matters a lot here because a spinning wheel needs continuous voltage to stay at speed.</p>
+
+    <h2>3. SingleJointedArmSim</h2>
+    <p><code>SingleJointedArmSim</code> models an arm rotating around one pivot. It includes gravity, which is why arms behave differently from normal motors.</p>
+
+    <pre><code>import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+
+private final SingleJointedArmSim armSim = new SingleJointedArmSim(
+    DCMotor.getKrakenX60(1),
+    60.0,  // Gear ratio
+    SingleJointedArmSim.estimateMOI(0.6, 4.0),
+    0.6,   // Arm length, meters
+    Math.toRadians(-70),
+    Math.toRadians(90),
+    true,  // Simulate gravity
+    Math.toRadians(0)
+);
+
+public void simulationPeriodic() {
+    armSim.setInputVoltage(armVolts);
+    armSim.update(0.02);
+
+    double armAngleRadians = armSim.getAngleRads();
+    double armVelocityRadPerSec = armSim.getVelocityRadPerSec();
+}</code></pre>
+
+    <p><strong>What each part means:</strong></p>
+    <ul>
+        <li><code>60.0</code> is the gear ratio between motor and arm.</li>
+        <li><code>estimateMOI(0.6, 4.0)</code> estimates how hard the arm is to rotate from length and mass.</li>
+        <li>The min and max angles act like physical stops.</li>
+        <li><code>true</code> turns on gravity simulation.</li>
+    </ul>
+
+    <h2>4. ElevatorSim</h2>
+    <p><code>ElevatorSim</code> models a vertical linear mechanism. This is useful for elevators, lifts, and anything that moves straight up and down.</p>
+
+    <pre><code>import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+
+private final ElevatorSim elevatorSim = new ElevatorSim(
+    DCMotor.getKrakenX60(1),
+    12.0, // Gear ratio
+    5.0,  // Carriage mass, kg
+    0.03, // Drum radius, meters
+    0.0,  // Minimum height, meters
+    1.2,  // Maximum height, meters
+    true, // Simulate gravity
+    0.0   // Starting height, meters
+);
+
+public void simulationPeriodic() {
+    elevatorSim.setInputVoltage(elevatorVolts);
+    elevatorSim.update(0.02);
+
+    double heightMeters = elevatorSim.getPositionMeters();
+    double velocityMetersPerSecond = elevatorSim.getVelocityMetersPerSecond();
+}</code></pre>
+
+    <p><strong>How to think about it:</strong> elevators need position limits and zeroing logic. The sim can help you check that commands stop at the top and bottom before testing on the robot.</p>
+
+    <h2>5. LinearSystemSim</h2>
+    <p><code>LinearSystemSim</code> is the base class underneath several WPILib mechanism sims. New students usually should not start here. Use the specific classes first: <code>DCMotorSim</code>, <code>FlywheelSim</code>, <code>SingleJointedArmSim</code>, and <code>ElevatorSim</code>.</p>
+
+    <hr>
+
+    <h2>Connecting Sim To A Subsystem</h2>
+    <p>The cleanest pattern is to make real hardware and simulated hardware provide the same data to the subsystem. Later, this also connects nicely to AdvantageKit IO layers.</p>
+
+    <pre><code>public class ShooterIOInputs {
+    public double velocityRadPerSec;
+    public double appliedVolts;
+}
+
+public interface ShooterIO {
+    void updateInputs(ShooterIOInputs inputs);
+    void setVoltage(double volts);
+}</code></pre>
+
+    <p>The real implementation reads the motor controller. The sim implementation uses <code>FlywheelSim</code>. The subsystem can use either one without changing command code.</p>
+
+    <h2>Units In Simulation IO Interfaces</h2>
+    <p>Typed units are useful at the subsystem boundary because they make commands harder to call incorrectly. The sim implementation can convert those units into the raw doubles that WPILib simulation classes expect.</p>
+
+    <pre><code>import static edu.wpi.first.units.Units.*;
+
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+
+public interface ArmIO {
+    public static class ArmIOInputs {
+        public Angle position = Degrees.zero();
+        public double velocityRadPerSec = 0.0;
+        public Voltage appliedVoltage = Volts.zero();
+    }
+
+    default void updateInputs(ArmIOInputs inputs) {}
+    default void setVoltage(Voltage volts) {}
+    default void goToPosition(Angle position) {}
+    default void holdPosition() {}
+    default void stop() {}
+}
+
+public class ArmIOSim implements ArmIO {
+    private final SingleJointedArmSim sim = new SingleJointedArmSim(
+        DCMotor.getKrakenX60(1),
+        60.0,
+        SingleJointedArmSim.estimateMOI(0.6, 4.0),
+        0.6,
+        Math.toRadians(-70),
+        Math.toRadians(90),
+        true,
+        0.0
+    );
+
+    private Voltage appliedVoltage = Volts.zero();
+
+    @Override
+    public void updateInputs(ArmIOInputs inputs) {
+        sim.setInputVoltage(appliedVoltage.in(Volts));
+        sim.update(0.02);
+
+        inputs.position = Radians.of(sim.getAngleRads());
+        inputs.velocityRadPerSec = sim.getVelocityRadPerSec();
+        inputs.appliedVoltage = appliedVoltage;
+    }
+
+    @Override
+    public void setVoltage(Voltage volts) {
+        appliedVoltage = volts;
+    }
+
+    @Override
+    public void goToPosition(Angle position) {
+        double goalRadians = position.in(Radians);
+        // A real version would calculate PID voltage from this goal.
+    }
+}</code></pre>
+
+    <p><strong>Good pattern:</strong> use units in the subsystem API, then convert to raw doubles inside the IO implementation when a simulation class, motor controller, or sensor API requires it.</p>
+
+    <section class="mission">
+        <h3>Mission 1</h3>
+        <p>Pick one mechanism and list the real IO class and the sim IO class it would need. The sim IO should fake the same inputs the real hardware normally reports.</p>
+    </section>
+
+    <section class="mission">
+        <h3>Mission 2</h3>
+        <p>Choose one of the examples above and identify the motor model, gear ratio, physical measurement, input voltage, and fake sensor output.</p>
+    </section>
+
+    <section class="note">
+        <h3>Reference</h3>
+        <p>Use the official WPILib <a href="https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/physics-sim.html" target="_blank">Physics Simulation</a> docs and the Java API pages for <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/DCMotorSim.html" target="_blank">DCMotorSim</a> and <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/simulation/ElevatorSim.html" target="_blank">ElevatorSim</a> when writing real robot code.</p>
+    </section>
+
+    <div class="nav-links">
+        <a href="../Auto/Autonomous_Overview.html">Previous: Autonomous</a>
+        <a href="../AdvantageKit/AdvantageKit_Overview.html">Next: AdvantageKit</a>
+    </div>
+</main>
+</body>
+</html>

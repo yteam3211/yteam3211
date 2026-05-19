@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WPILib Project Structure</title>
+    <link rel="stylesheet" href="../course.css">
+    <script src="../sidebar.js" defer></script>
+</head>
+<body>
+<main>
+    <h1>WPILib Project Structure</h1>
+    <p>A robot project is not just random Java files. WPILib projects have a predictable shape so every programmer can find the robot startup code, subsystems, commands, constants, and vendor configuration.</p>
+
+    <h2>The Files You Should Recognize</h2>
+    <ul>
+        <li><strong>Robot.java:</strong> The timed robot lifecycle. Most teams keep this small.</li>
+        <li><strong>RobotContainer.java:</strong> Where subsystems, commands, button bindings, and auto chooser setup are connected.</li>
+        <li><strong>Constants.java:</strong> IDs, gear ratios, physical measurements, and tuning values.</li>
+        <li><strong>subsystems/:</strong> Classes that own hardware like motors and sensors.</li>
+        <li><strong>commands/:</strong> Classes that tell subsystems what to do.</li>
+    </ul>
+
+    <h2>Rule Of Thumb</h2>
+    <p>If a class talks directly to motors or sensors, it probably belongs in a subsystem. If a class describes an action over time, it is probably a command.</p>
+
+    <pre><code>src/main/java/frc/robot/
+  Robot.java
+  RobotContainer.java
+  Constants.java
+  subsystems/
+    DriveSubsystem.java
+  commands/
+    ArcadeDriveCommand.java</code></pre>
+
+    <section class="mission">
+        <h3>Mission</h3>
+        <p>Create a new command-based robot project and identify where you would put a drivetrain, shooter, and arm. You do not need to write the subsystem yet; just make sure the folder structure makes sense.</p>
+    </section>
+
+    <div class="nav-links">
+        <a href="WPILib_Resources.html">Previous: Docs &amp; Tutorials</a>
+        <a href="WPILib_Subsystem.html">Next: Subsystems</a>
+    </div>
+</main>
+</body>
+</html>

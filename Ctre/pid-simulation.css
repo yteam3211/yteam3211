@@ -1,0 +1,220 @@
+.pid-sim {
+    max-width: 980px;
+    margin: 40px auto;
+    padding: 22px;
+    background: #141414;
+    border: 1px solid #333;
+    border-radius: 8px;
+    text-align: left;
+}
+
+.pid-sim h2,
+.pid-sim h3,
+.pid-sim p {
+    max-width: none;
+}
+
+.pid-sim__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+}
+
+.pid-sim__header h2 {
+    margin: 0 0 8px 0;
+}
+
+.pid-sim__header p,
+.pid-sim__hint {
+    margin: 0;
+    color: #d8d8d8;
+}
+
+.pid-sim__actions,
+.pid-sim__switches,
+.pid-sim__presets {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pid-sim__actions {
+    justify-content: flex-end;
+}
+
+.pid-sim button {
+    border: 1px solid #444;
+    background: #242424;
+    color: #ffffff;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pid-sim button:hover,
+.pid-sim button:focus {
+    background: #4da6ff;
+    color: #000000;
+    outline: none;
+}
+
+.pid-sim button.is-active {
+    background: #4da6ff;
+    color: #000000;
+}
+
+.pid-sim__toolbar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.pid-sim__layout {
+    display: grid;
+    grid-template-columns: minmax(320px, 1fr) 320px;
+    gap: 20px;
+    align-items: start;
+}
+
+.pid-sim__canvas-wrap {
+    background: #080808;
+    border: 1px solid #2c2c2c;
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.pid-sim canvas {
+    display: block;
+    width: 100%;
+    height: 430px;
+}
+
+.pid-sim__controls {
+    display: grid;
+    gap: 14px;
+}
+
+.pid-sim__control {
+    display: grid;
+    gap: 6px;
+}
+
+.pid-sim__control label {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: #f0f0f0;
+    font-weight: 700;
+}
+
+.pid-sim__control output {
+    color: #9ed0ff;
+    font-variant-numeric: tabular-nums;
+}
+
+.pid-sim__control input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #444;
+    background: #0d0d0d;
+    color: #ffffff;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+}
+
+.pid-sim__control input:focus {
+    border-color: #4da6ff;
+    outline: none;
+}
+
+.pid-sim__control input:invalid {
+    border-color: #f39c12;
+}
+
+.pid-sim__check {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #ededed;
+    font-weight: 700;
+}
+
+.pid-sim__check input {
+    accent-color: #4da6ff;
+}
+
+.pid-sim__readouts {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.pid-sim__readout {
+    background: #1c1c1c;
+    border: 1px solid #303030;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+.pid-sim__readout span {
+    display: block;
+    color: #bdbdbd;
+    font-size: 0.84rem;
+}
+
+.pid-sim__readout strong {
+    display: block;
+    color: #ffffff;
+    font-size: 1.05rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.pid-sim__lesson {
+    margin: 16px 0 0 0;
+    color: #d8d8d8;
+}
+
+@media (max-width: 940px) {
+    .pid-sim__header,
+    .pid-sim__toolbar,
+    .pid-sim__layout {
+        display: block;
+    }
+
+    .pid-sim__actions,
+    .pid-sim__presets {
+        justify-content: flex-start;
+        margin-top: 14px;
+    }
+
+    .pid-sim__controls {
+        margin-top: 18px;
+    }
+
+    .pid-sim__readouts {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 560px) {
+    .pid-sim {
+        padding: 16px;
+    }
+
+    .pid-sim canvas {
+        height: 360px;
+    }
+
+    .pid-sim__readouts {
+        grid-template-columns: 1fr;
+    }
+}

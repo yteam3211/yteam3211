@@ -7,6 +7,7 @@
             title: "Basics",
             links: [
                 ["Home", "index.html"],
+                ["Course Map", "CourseMap.html"],
                 ["Java Start", "Java/JavaStart.html"],
                 ["Java Exercise", "Java/JavaExracise.html"],
                 ["Git Start", "Git/GitBasic.html"],
@@ -18,9 +19,12 @@
             links: [
                 ["Introduction", "WPILib/WPILib_Introduction.html"],
                 ["Docs & Tutorials", "WPILib/WPILib_Resources.html"],
+                ["Project Structure", "WPILib/WPILib_ProjectStructure.html"],
                 ["Subsystems", "WPILib/WPILib_Subsystem.html"],
                 ["Commands", "WPILib/WPILib_Command.html"],
                 ["Scheduler & RobotContainer", "WPILib/WPILib_CommandSchedulerAndRobotContainer.html"],
+                ["Button Bindings", "WPILib/WPILib_ButtonBindings.html"],
+                ["Units", "WPILib/WPILib_Units.html"],
             ],
         },
         {
@@ -28,7 +32,25 @@
             links: [
                 ["TalonFX", "Ctre/CTRE_TalonFX.html"],
                 ["PID", "Ctre/CTRE_PID.html"],
+                ["Feedforward", "Ctre/CTRE_Feedforward.html"],
                 ["PID & Feedforward", "Ctre/CTRE_PID_Feedforward.html"],
+            ],
+        },
+        {
+            title: "Robot Code",
+            links: [
+                ["Sensors", "Sensors/Sensors_Overview.html"],
+                ["Mechanisms", "Mechanisms/Mechanisms_Overview.html"],
+                ["Autonomous", "Auto/Autonomous_Overview.html"],
+            ],
+        },
+        {
+            title: "Advanced",
+            links: [
+                ["Simulation", "Simulation/Simulation_Overview.html"],
+                ["AdvantageKit", "AdvantageKit/AdvantageKit_Overview.html"],
+                ["Team Library", "TeamLibrary/TeamLibrary_Overview.html"],
+                ["Catalyst Generator", "frc-catalyst-subsystem-generator.html"],
             ],
         },
     ];

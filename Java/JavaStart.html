@@ -56,6 +56,23 @@
             text-align: left;
             border-radius: 0 8px 8px 0;
         }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            max-width: 800px;
+            margin: 50px auto 0 auto;
+        }
+        .nav-links a {
+            padding: 8px 15px;
+            background-color: #333;
+            border-radius: 5px;
+        }
+        .nav-links a:hover {
+            background-color: #4da6ff;
+            color: #000;
+            text-decoration: none;
+        }
     </style>
     <script src="../sidebar.js" defer></script>
 </head>
@@ -96,6 +113,11 @@
     <p>Once you have finished this, go to <a href="JavaExracise.html">Java Exercise</a> and complete the mission there.</p>
 
     <p>Good luck!</p>
+
+    <div class="nav-links">
+        <a href="../index.html">Previous: Home</a>
+        <a href="JavaExracise.html">Next: Java Exercise</a>
+    </div>
 
 </body>
 </html>

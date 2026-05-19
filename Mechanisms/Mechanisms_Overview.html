@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mechanisms Overview</title>
+    <link rel="stylesheet" href="../course.css">
+    <script src="../sidebar.js" defer></script>
+</head>
+<body>
+<main>
+    <h1>Real Robot Mechanisms</h1>
+    <p>This chapter turns the pieces into real subsystems. A good mechanism subsystem owns its motors and sensors, exposes simple methods, protects itself with limits, and logs enough data to debug problems later.</p>
+    <p>Most FRC mechanisms are variations of a few common patterns. Once you recognize the pattern, it becomes much easier to choose sensors, control mode, safety limits, and commands.</p>
+
+    <h2>Mechanism Map</h2>
+    <div class="course-grid">
+        <section class="course-card">
+            <h3>Arms</h3>
+            <p>Rotating mechanisms that move to an angle and fight gravity.</p>
+        </section>
+        <section class="course-card">
+            <h3>Elevators</h3>
+            <p>Linear mechanisms that move up and down and must be zeroed safely.</p>
+        </section>
+        <section class="course-card">
+            <h3>Flywheels</h3>
+            <p>Spinning wheels that need stable velocity before shooting.</p>
+        </section>
+        <section class="course-card">
+            <h3>Rollers</h3>
+            <p>Simple motorized wheels for intaking, indexing, transferring, and ejecting game pieces.</p>
+        </section>
+        <section class="course-card">
+            <h3>Drivetrains</h3>
+            <p>The robot base. It usually has default commands, odometry, gyro use, and autonomous path following.</p>
+        </section>
+        <section class="course-card">
+            <h3>Wrists</h3>
+            <p>Small arms mounted on larger mechanisms. They often need absolute encoders and soft limits.</p>
+        </section>
+        <section class="course-card">
+            <h3>Climbers</h3>
+            <p>High-force mechanisms where current limits, brake mode, and end stops matter a lot.</p>
+        </section>
+        <section class="course-card">
+            <h3>Actuators</h3>
+            <p>Simple on/off or position devices like pneumatics, servos, and latches.</p>
+        </section>
+    </div>
+
+    <hr>
+
+    <h2>1. Arms</h2>
+    <p>An arm rotates around a pivot. The code usually commands an angle, and the motor must fight gravity differently depending on the arm angle.</p>
+    <ul>
+        <li><strong>Typical control:</strong> position PID plus arm feedforward.</li>
+        <li><strong>Useful sensors:</strong> absolute encoder, motor encoder, limit switch for calibration.</li>
+        <li><strong>Safety:</strong> soft limits, max voltage, current limits, and safe starting position.</li>
+        <li><strong>Common mistake:</strong> tuning PID while ignoring gravity, which makes the arm behave differently at different angles.</li>
+    </ul>
+
+    <h2>2. Elevators</h2>
+    <p>An elevator moves in a straight line. It is usually controlled by height, but the sensor may measure motor rotations.</p>
+    <ul>
+        <li><strong>Typical control:</strong> position PID, gravity feedforward, and sometimes motion profiling.</li>
+        <li><strong>Useful sensors:</strong> relative encoder, bottom limit switch, sometimes top limit switch.</li>
+        <li><strong>Safety:</strong> zero the elevator carefully, prevent driving below zero, and limit speed near endpoints.</li>
+        <li><strong>Common mistake:</strong> forgetting that string, chain, or belt mechanisms can skip or stretch.</li>
+    </ul>
+
+    <h2>3. Flywheels</h2>
+    <p>A flywheel stores energy by spinning fast. For shooters, the important question is not just "is the motor on?" but "is the wheel at the right speed?"</p>
+    <ul>
+        <li><strong>Typical control:</strong> velocity PID plus kS/kV feedforward.</li>
+        <li><strong>Useful sensors:</strong> motor encoder velocity, beam break for game piece detection.</li>
+        <li><strong>Safety:</strong> wait until speed is stable before feeding a game piece.</li>
+        <li><strong>Common mistake:</strong> shooting as soon as the command starts instead of waiting for <code>atGoal</code>.</li>
+    </ul>
+
+    <h2>4. Rollers</h2>
+    <p>Rollers are the simplest and most common mechanism. They move game pieces through the robot: intake, indexer, feeder, conveyor, or outtake.</p>
+    <ul>
+        <li><strong>Typical control:</strong> percent output or voltage control.</li>
+        <li><strong>Useful sensors:</strong> beam break, current sensing, motor velocity if jams matter.</li>
+        <li><strong>Safety:</strong> stop when the game piece is captured, reverse to clear jams, and avoid fighting another roller.</li>
+        <li><strong>Common mistake:</strong> having three commands all try to control the same roller at once.</li>
+    </ul>
+
+    <h2>5. Drivetrains</h2>
+    <p>The drivetrain is a mechanism too, but it is special because it is always being controlled during teleop and auto.</p>
+    <ul>
+        <li><strong>Typical control:</strong> default driving command, closed-loop velocity, odometry, and path following.</li>
+        <li><strong>Useful sensors:</strong> wheel encoders, gyro, swerve absolute encoders, vision pose estimates.</li>
+        <li><strong>Safety:</strong> current limits, brake/coast behavior, joystick deadband, and alliance-aware autonomous.</li>
+        <li><strong>Common mistake:</strong> mixing field-relative and robot-relative directions without noticing.</li>
+    </ul>
+
+    <h2>6. Wrists</h2>
+    <p>A wrist is a smaller rotating mechanism often attached to an arm or elevator. Because the base moves, wrist behavior can be harder to reason about than it looks.</p>
+    <ul>
+        <li><strong>Typical control:</strong> position PID, often with simple gravity compensation.</li>
+        <li><strong>Useful sensors:</strong> absolute encoder or motor encoder with a known zero.</li>
+        <li><strong>Safety:</strong> collision zones, soft limits, and safe combinations with the arm/elevator.</li>
+        <li><strong>Common mistake:</strong> tuning the wrist alone and forgetting it may hit the robot when the arm moves.</li>
+    </ul>
+
+    <h2>7. Climbers</h2>
+    <p>A climber is usually powerful, slow, and dangerous. It often needs stronger safety rules than other mechanisms.</p>
+    <ul>
+        <li><strong>Typical control:</strong> voltage control, position limits, and sometimes current-based detection.</li>
+        <li><strong>Useful sensors:</strong> encoder, limit switch, current draw, ratchet/latch state.</li>
+        <li><strong>Safety:</strong> brake mode, current limits, end stops, and driver confirmation.</li>
+        <li><strong>Common mistake:</strong> treating a climber like a normal motor when it can damage the robot.</li>
+    </ul>
+
+    <h2>8. Simple Actuators</h2>
+    <p>Some mechanisms are not closed-loop motor systems. Pneumatics, servos, and latches often have a small number of states.</p>
+    <ul>
+        <li><strong>Typical control:</strong> set a state like open/closed, locked/unlocked, deployed/retracted.</li>
+        <li><strong>Useful sensors:</strong> limit switches or pressure/state feedback if available.</li>
+        <li><strong>Safety:</strong> make sure the actuator cannot move at the wrong time in the match.</li>
+        <li><strong>Common mistake:</strong> not tracking state, so code does not know whether it thinks the actuator is open or closed.</li>
+    </ul>
+
+    <hr>
+
+    <h2>Subsystem Design Checklist</h2>
+    <ol>
+        <li>Define the hardware IDs in constants.</li>
+        <li>Configure motor direction, neutral mode, and current limits.</li>
+        <li>Convert sensor units into mechanism units.</li>
+        <li>Add safe public methods like <code>setVoltage</code>, <code>stop</code>, and <code>atGoal</code>.</li>
+        <li>Keep dangerous direct motor access private.</li>
+    </ol>
+
+    <section class="mission">
+        <h3>Mission 1</h3>
+        <p>Create a subsystem plan for a shooter. Include motor IDs, sensor source, control mode, and what data should be shown to drivers.</p>
+    </section>
+
+    <section class="mission">
+        <h3>Mission 2</h3>
+        <p>Choose one mechanism from the map and write a design table with: mechanism type, control mode, sensors, safety limits, commands, and what <code>atGoal</code> should mean.</p>
+    </section>
+
+    <div class="nav-links">
+        <a href="../Sensors/Sensors_Overview.html">Previous: Sensors</a>
+        <a href="../Auto/Autonomous_Overview.html">Next: Autonomous</a>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WPILib Units</title>
+    <link rel="stylesheet" href="../course.css">
+    <script src="../sidebar.js" defer></script>
+</head>
+<body>
+<main>
+    <h1>WPILib Units</h1>
+    <p>Robot code uses a lot of measurements: angles, distances, speeds, voltages, currents, and times. WPILib's units system lets Java carry the type of measurement with the value, so students are less likely to mix up degrees and radians, meters and inches, or volts and amps.</p>
+
+    <p>The short version is: a <code>Unit</code> describes the measurement system, and a measure like <code>Angle</code>, <code>Voltage</code>, or <code>Current</code> stores a number with that unit.</p>
+
+    <h2>1. Importing Units</h2>
+    <p>Most robot code imports WPILib's predefined units statically. This makes code read naturally.</p>
+
+    <pre><code>import static edu.wpi.first.units.Units.*;
+
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.units.measure.Voltage;</code></pre>
+
+    <p><strong>What this means:</strong> <code>Units</code> contains names like <code>Degrees</code>, <code>Radians</code>, <code>Volts</code>, <code>Amps</code>, <code>Meters</code>, and <code>Seconds</code>. The measure interfaces describe the kind of value you are storing.</p>
+
+    <h2>2. Creating Measurements</h2>
+    <p>Use <code>of</code> to create a measurement. The unit name decides what the number means.</p>
+
+    <pre><code>Angle armGoal = Degrees.of(45.0);
+AngularVelocity shooterSpeed = RPM.of(3500.0);
+Voltage motorVoltage = Volts.of(6.0);
+Current motorCurrent = Amps.of(32.0);
+Distance elevatorHeight = Meters.of(0.75);
+Time timeout = Seconds.of(1.5);</code></pre>
+
+    <p><strong>What each one means:</strong></p>
+    <ul>
+        <li><code>Degrees.of(45.0)</code> creates an <code>Angle</code>.</li>
+        <li><code>RPM.of(3500.0)</code> creates an <code>AngularVelocity</code>.</li>
+        <li><code>Volts.of(6.0)</code> creates a <code>Voltage</code>.</li>
+        <li><code>Amps.of(32.0)</code> creates a <code>Current</code>.</li>
+        <li><code>Meters.of(0.75)</code> creates a <code>Distance</code>.</li>
+        <li><code>Seconds.of(1.5)</code> creates a <code>Time</code>.</li>
+    </ul>
+
+    <h2>3. Converting Back To Numbers</h2>
+    <p>Most WPILib and vendor APIs still want plain <code>double</code> values. Use <code>in</code> when you need to convert a typed measurement into a number.</p>
+
+    <pre><code>Angle armGoal = Degrees.of(90.0);
+
+double goalDegrees = armGoal.in(Degrees);
+double goalRadians = armGoal.in(Radians);</code></pre>
+
+    <p><strong>Why this helps:</strong> <code>goalDegrees</code> and <code>goalRadians</code> are different numbers, but they represent the same angle. The conversion is explicit, so the code says exactly what unit the hardware or controller expects.</p>
+
+    <h2>4. Angle And Angular Velocity</h2>
+    <p>Arms, wrists, and swerve modules usually care about angle. Flywheels and shooter wheels usually care about angular velocity.</p>
+
+    <pre><code>Angle wristSetpoint = Degrees.of(30.0);
+AngularVelocity shooterSetpoint = RotationsPerSecond.of(60.0);
+
+double wristRadians = wristSetpoint.in(Radians);
+double shooterRadPerSec = shooterSetpoint.in(RadiansPerSecond);
+double shooterRpm = shooterSetpoint.in(RPM);</code></pre>
+
+    <p><strong>Common mistake:</strong> many math functions expect radians, but humans often tune in degrees. Store the value as an <code>Angle</code>, then convert at the exact place that needs radians.</p>
+
+    <h2>5. Voltage And Current</h2>
+    <p>Voltage is what we command to motors. Current is what the motor is drawing. They are not the same thing, and the units system makes that difference visible.</p>
+
+    <pre><code>Voltage requestedVoltage = Volts.of(8.0);
+Current statorCurrent = Amps.of(38.0);
+
+motor.setVoltage(requestedVoltage.in(Volts));
+
+if (statorCurrent.gt(Amps.of(60.0))) {
+    stopMotor();
+}</code></pre>
+
+    <p><strong>How to think about it:</strong> command volts, measure amps. A current spike often means a mechanism is jammed, stalled, or hitting a hard stop.</p>
+
+    <h2>6. Distance And Linear Velocity</h2>
+    <p>Elevators and drivetrains usually use linear units. Use <code>Distance</code> for positions and <code>LinearVelocity</code> for speeds.</p>
+
+    <pre><code>Distance elevatorGoal = Inches.of(24.0);
+LinearVelocity driveSpeed = MetersPerSecond.of(2.0);
+
+double elevatorMeters = elevatorGoal.in(Meters);
+double driveMetersPerSecond = driveSpeed.in(MetersPerSecond);</code></pre>
+
+    <p><strong>Why this helps:</strong> a team can talk about an elevator in inches, while the simulation and WPILib math use meters internally.</p>
+
+    <h2>7. When To Use Raw Doubles</h2>
+    <ul>
+        <li>Use typed units in subsystem methods, constants, commands, and important setpoints.</li>
+        <li>Use raw doubles when a library method requires a double.</li>
+        <li>Convert close to the hardware boundary, not far away in command code.</li>
+        <li>Put the unit in the variable name when using a raw double.</li>
+    </ul>
+
+    <section class="mission">
+        <h3>Mission 1</h3>
+        <p>Rewrite three raw numbers from an arm, elevator, or shooter as typed WPILib measurements. Example: change <code>double goalDeg = 45.0</code> into <code>Angle goal = Degrees.of(45.0)</code>.</p>
+    </section>
+
+    <section class="mission">
+        <h3>Mission 2</h3>
+        <p>Find one place where a motor or sensor API needs a <code>double</code>. Convert a typed measurement with <code>in</code> at that line.</p>
+    </section>
+
+    <section class="note">
+        <h3>Reference</h3>
+        <p>Use the WPILib API pages for <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/measure/package-summary.html" target="_blank">measure types</a>, the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/Unit.html" target="_blank">Unit base class</a>, and the <a href="https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/units/Units.html" target="_blank">predefined Units class</a> when checking exact names.</p>
+    </section>
+
+    <div class="nav-links">
+        <a href="WPILib_ButtonBindings.html">Previous: Button Bindings</a>
+        <a href="../Ctre/CTRE_TalonFX.html">Next: CTRE TalonFX</a>
+    </div>
+</main>
+</body>
+</html>

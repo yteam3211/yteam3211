@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdvantageKit Overview</title>
+    <link rel="stylesheet" href="../course.css">
+    <script src="../sidebar.js" defer></script>
+</head>
+<body>
+<main>
+    <h1>AdvantageKit</h1>
+    <p>AdvantageKit is an advanced logging and replay framework. The important idea is that robot code should read inputs, record them, produce outputs, and be able to replay the same inputs later in simulation.</p>
+    <p>The biggest change for new students is the IO layer. Instead of a subsystem reading motor controllers directly, the subsystem asks an IO object for sensor data. AdvantageKit logs that sensor data so the same subsystem code can be replayed later without the robot.</p>
+
+    <h2>The Big Pattern</h2>
+    <ul>
+        <li><strong>Inputs:</strong> Sensor and hardware data collected from an IO layer.</li>
+        <li><strong>Outputs:</strong> Motor commands and subsystem state decisions.</li>
+        <li><strong>Replay:</strong> Running robot code again from a log to debug without the robot.</li>
+        <li><strong>AdvantageScope:</strong> A tool for graphing logs and visualizing robot state.</li>
+    </ul>
+
+    <h2>Why This Comes Late</h2>
+    <p>AdvantageKit is powerful, but it makes more sense after students understand subsystems, commands, sensors, simulation, and logging. Otherwise the IO-layer pattern feels like ceremony instead of a debugging superpower.</p>
+
+    <hr>
+
+    <h2>1. The IO Interface</h2>
+    <p>An IO interface is the border between subsystem logic and hardware. The subsystem calls methods like <code>setVoltage</code>, while the IO implementation handles the real motor controller, simulated motor, or replayed log data.</p>
+
+    <pre><code>public interface ShooterIO {
+    default void updateInputs(ShooterIOInputs inputs) {}
+    default void setVoltage(double volts) {}
+    default void setTargetVelocity(double velocityRadPerSec) {}
+    default void stop() {}
+}</code></pre>
+
+    <p><strong>What each part means:</strong></p>
+    <ul>
+        <li><code>ShooterIO</code> describes what the subsystem needs from the hardware layer.</li>
+        <li><code>updateInputs</code> copies all sensor values into one inputs object once per robot loop.</li>
+        <li><code>setVoltage</code> is an output command. It tells the IO layer what the subsystem wants the motor to do.</li>
+        <li><code>setTargetVelocity</code> is another output command. A real IO class might pass this into a motor controller velocity request.</li>
+        <li><code>stop</code> gives every implementation a clear way to turn the mechanism off.</li>
+        <li>The empty <code>default</code> methods make it easy to create a dummy IO implementation for simulation or tests.</li>
+    </ul>
+
+    <p>For a position mechanism, the IO interface can include commands that sound like robot actions instead of raw motor calls.</p>
+
+    <pre><code>import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Voltage;
+
+public interface ArmIO {
+    default void updateInputs(ArmIOInputs inputs) {}
+    default void setVoltage(Voltage volts) {}
+    default void goToPosition(Angle position) {}
+    default void holdPosition() {}
+    default void stop() {}
+}</code></pre>
+
+    <p><strong>Why this style helps:</strong> <code>goToPosition</code> tells the hardware layer what the subsystem wants, but it does not force the subsystem to know whether the IO class uses a TalonFX closed loop, a WPILib PIDController, or a simulation model.</p>
+
+    <h2>2. The Inputs Class</h2>
+    <p>The inputs class stores every value the subsystem reads from hardware. For a shooter, that might be motor velocity, applied voltage, current, temperature, and whether the motor controller is connected.</p>
+
+    <pre><code>import org.littletonrobotics.junction.AutoLog;
+
+public interface ShooterIO {
+    @AutoLog
+    public static class ShooterIOInputs {
+        public double velocityRadPerSec = 0.0;
+        public double appliedVolts = 0.0;
+        public double currentAmps = 0.0;
+        public boolean connected = true;
+    }
+
+    void updateInputs(ShooterIOInputs inputs);
+    void setVoltage(double volts);
+}</code></pre>
+
+    <p><strong>What each field means:</strong></p>
+    <ul>
+        <li><code>velocityRadPerSec</code> is sensor data from the encoder.</li>
+        <li><code>appliedVolts</code> is the voltage actually sent to the motor.</li>
+        <li><code>currentAmps</code> helps find jams, bad gearing, or a motor working too hard.</li>
+        <li><code>connected</code> is useful for alerts when a CAN device is missing.</li>
+    </ul>
+
+    <h2>3. @AutoLog</h2>
+    <p><code>@AutoLog</code> tells AdvantageKit to generate a second class with logging support. If the class is named <code>ShooterIOInputs</code>, the generated class is named <code>ShooterIOInputsAutoLogged</code>.</p>
+
+    <pre><code>private final ShooterIOInputsAutoLogged inputs =
+    new ShooterIOInputsAutoLogged();</code></pre>
+
+    <p>Use the generated <code>AutoLogged</code> class in the subsystem, not the original inputs class. AdvantageKit uses that generated class to save inputs to the log and load them back during replay.</p>
+
+    <section class="note">
+        <h3>Important Rule</h3>
+        <p>Everything the subsystem reads from hardware should go inside the inputs class. If a sensor value is read directly in the subsystem and never logged, replay will not be able to reproduce that behavior.</p>
+    </section>
+
+    <h2>4. Units In AdvantageKit Inputs</h2>
+    <p>AdvantageKit can log measure values in inputs classes, but many teams still choose simple doubles with unit names in the field. Both styles can work. The important part is to be consistent.</p>
+
+    <pre><code>import static edu.wpi.first.units.Units.*;
+
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
+import org.littletonrobotics.junction.AutoLog;
+
+@AutoLog
+public static class ArmIOInputs {
+    public Angle position = Degrees.zero();
+    public AngularVelocity velocity = RadiansPerSecond.zero();
+    public Voltage appliedVoltage = Volts.zero();
+    public Current current = Amps.zero();
+
+    // Also acceptable if your team prefers raw log fields:
+    public double positionRad = 0.0;
+    public double currentAmps = 0.0;
+}</code></pre>
+
+    <p><strong>Team rule suggestion:</strong> if a field is a raw <code>double</code>, put the unit in the name, such as <code>positionRad</code>, <code>heightMeters</code>, or <code>currentAmps</code>.</p>
+
+    <h2>5. Real IO Implementation</h2>
+    <p>The real IO class talks to actual hardware. It reads motor controller values in <code>updateInputs</code> and applies commands in methods like <code>setVoltage</code>.</p>
+
+    <pre><code>public class ShooterIOTalonFX implements ShooterIO {
+    private final TalonFX motor = new TalonFX(10);
+
+    @Override
+    public void updateInputs(ShooterIOInputs inputs) {
+        inputs.velocityRadPerSec =
+            motor.getVelocity().getValueAsDouble() * 2.0 * Math.PI;
+        inputs.appliedVolts = motor.getMotorVoltage().getValueAsDouble();
+        inputs.currentAmps = motor.getStatorCurrent().getValueAsDouble();
+        inputs.connected = motor.isConnected();
+    }
+
+    @Override
+    public void setVoltage(double volts) {
+        motor.setVoltage(volts);
+    }
+}</code></pre>
+
+    <p><strong>How to think about it:</strong> this class is allowed to know about TalonFX, SparkMax, CANcoder, gyros, and other hardware. The subsystem should not need to know those details.</p>
+
+    <h2>6. Sim IO Implementation</h2>
+    <p>The sim IO class uses WPILib simulation classes instead of real hardware. It still fills in the same inputs object, so the subsystem does not care whether the data came from a real robot or a simulation.</p>
+
+    <pre><code>public class ShooterIOSim implements ShooterIO {
+    private final FlywheelSim sim =
+        new FlywheelSim(DCMotor.getKrakenX60(1), 1.5, 0.02);
+
+    private double appliedVolts = 0.0;
+
+    @Override
+    public void updateInputs(ShooterIOInputs inputs) {
+        sim.setInputVoltage(appliedVolts);
+        sim.update(0.02);
+
+        inputs.velocityRadPerSec = sim.getAngularVelocityRadPerSec();
+        inputs.appliedVolts = appliedVolts;
+        inputs.currentAmps = sim.getCurrentDrawAmps();
+        inputs.connected = true;
+    }
+
+    @Override
+    public void setVoltage(double volts) {
+        appliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
+    }
+}</code></pre>
+
+    <p><strong>Why this is useful:</strong> commands, PID, feedforward, and alerts can all run against simulated inputs before the robot exists.</p>
+
+    <h2>7. Logger.processInputs</h2>
+    <p>Every subsystem should update and process inputs once per loop. This usually happens at the start of <code>periodic</code>.</p>
+
+    <pre><code>public class Shooter extends SubsystemBase {
+    private final ShooterIO io;
+    private final ShooterIOInputsAutoLogged inputs =
+        new ShooterIOInputsAutoLogged();
+
+    private double targetRadPerSec = 0.0;
+
+    public Shooter(ShooterIO io) {
+        this.io = io;
+    }
+
+    @Override
+    public void periodic() {
+        io.updateInputs(inputs);
+        Logger.processInputs("Shooter", inputs);
+
+        Logger.recordOutput("Shooter/TargetRadPerSec", targetRadPerSec);
+        Logger.recordOutput("Shooter/AtSetpoint", atSetpoint());
+    }
+
+    public void setVoltage(double volts) {
+        io.setVoltage(volts);
+    }
+}</code></pre>
+
+    <p><strong>What each Logger call does:</strong></p>
+    <ul>
+        <li><code>Logger.processInputs("Shooter", inputs)</code> records all shooter inputs under the <code>Shooter</code> table.</li>
+        <li>During replay, <code>processInputs</code> can load the old logged values back into <code>inputs</code>.</li>
+        <li><code>Logger.recordOutput</code> records values calculated by robot code, like setpoints, command states, and debugging numbers.</li>
+    </ul>
+
+    <h2>8. Starting The Logger</h2>
+    <p>The logger is usually configured in <code>Robot.robotInit</code>. Metadata and data receivers must be added before <code>Logger.start()</code>.</p>
+
+    <pre><code>import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+
+@Override
+public void robotInit() {
+    Logger.recordMetadata("ProjectName", "YTeamTrainingRobot");
+
+    Logger.addDataReceiver(new WPILOGWriter());
+    Logger.addDataReceiver(new NT4Publisher());
+
+    Logger.start();
+
+    robotContainer = new RobotContainer();
+}</code></pre>
+
+    <p><strong>What this does:</strong></p>
+    <ul>
+        <li><code>recordMetadata</code> saves information about the code version, robot name, or event.</li>
+        <li><code>WPILOGWriter</code> writes log files that can be opened in AdvantageScope.</li>
+        <li><code>NT4Publisher</code> publishes live data over NetworkTables so AdvantageScope can see it while the robot runs.</li>
+        <li><code>Logger.start()</code> begins logging. Add receivers before this line.</li>
+    </ul>
+
+    <h2>9. Inputs vs Outputs</h2>
+    <ul>
+        <li><strong>Input:</strong> Something measured or received from outside robot code. Examples: encoder position, gyro angle, beam break state, motor current.</li>
+        <li><strong>Output:</strong> Something robot code decides or calculates. Examples: target velocity, chosen command state, PID error, desired arm angle.</li>
+        <li><strong>Use <code>processInputs</code> for inputs.</strong> This makes replay possible.</li>
+        <li><strong>Use <code>recordOutput</code> for outputs.</strong> This makes debugging easier, but outputs are not the source of replay.</li>
+    </ul>
+
+    <section class="mission">
+        <h3>Mission 1</h3>
+        <p>Take one subsystem you already understand and list every value that should go inside its inputs class. Separate sensor data from calculated outputs.</p>
+    </section>
+
+    <section class="mission">
+        <h3>Mission 2</h3>
+        <p>Write the IO interface for an arm, elevator, or intake. Include an <code>@AutoLog</code> inputs class, <code>updateInputs</code>, and at least one output method.</p>
+    </section>
+
+    <section class="note">
+        <h3>Reference</h3>
+        <p>Use the official AdvantageKit pages for <a href="https://docs.advantagekit.org/data-flow/recording-inputs/io-interfaces/" target="_blank">IO Interfaces</a>, <a href="https://docs.advantagekit.org/data-flow/recording-inputs/annotation-logging/" target="_blank">Annotation Logging</a>, and the <a href="https://docs.advantagekit.org/javadoc/org/littletonrobotics/junction/Logger.html" target="_blank">Logger API</a> when writing real robot code.</p>
+    </section>
+
+    <div class="nav-links">
+        <a href="../Simulation/Simulation_Overview.html">Previous: Simulation</a>
+        <a href="../TeamLibrary/TeamLibrary_Overview.html">Next: Team Library</a>
+    </div>
+</main>
+</body>
+</html>

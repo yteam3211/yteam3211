@@ -104,13 +104,15 @@
             text-decoration: none;
         }
     </style>
+    <link rel="stylesheet" href="pid-simulation.css">
     <script src="../sidebar.js" defer></script>
+    <script src="pid-simulation.js" defer></script>
 </head>
 <body>
 
     <h1>CTRE TalonFX: PID Control (Phoenix 6)</h1>
 
-    <p>While <strong>Feedforward</strong> handles the physics you already know, like friction and gravity, <strong>PID</strong> is the correction system. It looks at the difference between where the motor is and where you want it to be, then applies power to fix the error.</p>
+    <p><strong>PID</strong> is feedback control. It looks at the difference between where the mechanism is and where you want it to be, then applies power to fix that error.</p>
 
     <p>On the TalonFX, this PID loop runs inside the motor controller hardware at <strong>1000Hz</strong>, which is much faster and smoother than running it in your robot code.</p>
 
@@ -128,11 +130,13 @@
 
     <h3>I: Integral (The Memory)</h3>
     <p>It looks at the error over time. If the motor is stuck just before the target and cannot quite get there due to friction, the <strong>I</strong> term builds up energy over time to give it a final push.</p>
-    <p><strong>Note:</strong> In FRC, we rarely use <strong>kI</strong> because a good Feedforward usually solves the friction problem better.</p>
+    <p><strong>Note:</strong> In FRC, we rarely use <strong>kI</strong> because it can build up too much output if the mechanism is stuck or disabled.</p>
 
     <h3>D: Derivative (The Brake)</h3>
     <p>It looks at how fast the error is changing. If the motor is approaching the target very quickly, the <strong>D</strong> term applies a braking force to prevent an overshoot.</p>
     <p><strong>Benefit:</strong> It allows you to have a higher <strong>kP</strong> for a faster response while keeping the movement smooth.</p>
+
+    <section class="pid-sim" data-pid-simulation data-scope="pid" aria-label="Interactive PID tuning simulation"></section>
 
     <hr>
 
@@ -177,7 +181,7 @@ m_talonFX.setControl(new VelocityVoltage(60.0));</code></pre>
 
     <div class="nav-links">
         <a href="CTRE_TalonFX.html">Previous: CTRE and TalonFX</a>
-        <a href="CTRE_PID_Feedforward.html">Next: PID and Feedforward</a>
+        <a href="CTRE_Feedforward.html">Next: Feedforward</a>
     </div>
 
 </body>

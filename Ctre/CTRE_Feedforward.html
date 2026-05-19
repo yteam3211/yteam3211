@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CTRE PID and Feedforward Combined</title>
+    <title>CTRE TalonFX Feedforward</title>
     <style>
         body {
             background-color: #000000;
@@ -101,58 +101,55 @@
 </head>
 <body>
 
-    <h1>CTRE TalonFX: PID + Feedforward Combined (Phoenix 6)</h1>
+    <h1>CTRE TalonFX: Feedforward (Phoenix 6)</h1>
 
-    <p>Once you understand PID and Feedforward separately, the best control loops usually combine them. Feedforward predicts the voltage the mechanism should need, and PID corrects whatever error is still left.</p>
+    <p><strong>Feedforward</strong> is prediction. Instead of waiting for an error, it estimates how much voltage the mechanism should need before the motor starts moving.</p>
 
-    <p>The best part about Phoenix 6 is that these calculations happen on the motor controller at <strong>1000Hz</strong>, making the robot smoother and more responsive.</p>
+    <p>This is especially useful for FRC mechanisms that fight real physics: flywheels need voltage to maintain speed, and arms need voltage to hold themselves up against gravity.</p>
 
     <hr>
 
-    <h2>1. Feedforward (The Prediction)</h2>
-    <p>Feedforward is the open-loop part of control. It calculates how much voltage is needed to overcome physics before we even look at the error.</p>
+    <h2>1. What is Feedforward?</h2>
+    <p>Feedforward does not look at encoder error. It uses a model of the mechanism and asks, "How much voltage should this take?"</p>
 
     <h3>Key Constants in Phoenix 6</h3>
     <ul>
-        <li><strong>kS (Static):</strong> The voltage needed just to overcome friction. If your motor hums but does not move, your kS is too low.</li>
-        <li><strong>kV (Velocity):</strong> The voltage needed to maintain a constant speed. This is the most important for shooters.</li>
-        <li><strong>kA (Acceleration):</strong> The voltage needed to reach a certain speed quickly.</li>
-        <li><strong>kG (Gravity):</strong> Used only for arms and elevators. It provides constant power to keep the mechanism from falling down due to gravity.</li>
+        <li><strong>kS (Static):</strong> Voltage needed to overcome friction and start moving.</li>
+        <li><strong>kV (Velocity):</strong> Voltage needed to maintain a speed.</li>
+        <li><strong>kA (Acceleration):</strong> Voltage needed to speed up quickly.</li>
+        <li><strong>kG (Gravity):</strong> Voltage needed to hold an arm or elevator against gravity.</li>
     </ul>
+
+    <section class="pid-sim" data-pid-simulation data-scope="feedforward" aria-label="Interactive feedforward tuning simulation"></section>
 
     <hr>
 
-    <h2>2. PID (The Correction)</h2>
-    <p>While Feedforward gets you close, PID uses the encoder to fix the remaining error.</p>
-    <ul>
-        <li><strong>kP (Proportional):</strong> The force. If you are far from the target, it pushes hard. If you are close, it pushes gently. Too high causes oscillation.</li>
-        <li><strong>kI (Integral):</strong> The memory. It adds up small errors over time to fix steady-state error. We rarely use this in FRC.</li>
-        <li><strong>kD (Derivative):</strong> The brake. It looks at how fast you are approaching the target and slows you down so you do not overshoot.</li>
-    </ul>
+    <h2>2. Setting Feedforward Gains in Java</h2>
+    <p>In Phoenix 6, the feedforward gains live in the same <code>Slot0Configs</code> object as PID gains, but this page only sets the feedforward terms.</p>
 
-    <section class="pid-sim" data-pid-simulation data-scope="combined" aria-label="Interactive combined PID and feedforward simulation"></section>
+    <pre><code>var slot0 = new Slot0Configs();
+
+slot0.kS = 0.24; // Volts to break static friction
+slot0.kV = 0.12; // Volts per rotation per second
+slot0.kA = 0.01; // Volts per rotation per second squared
+slot0.kG = 0.35; // Volts to fight gravity, for arms/elevators
+
+// Apply to the motor configurator
+m_talonFX.getConfigurator().apply(slot0);</code></pre>
 
     <hr>
 
-    <h2>3. Combined Implementation Code</h2>
-    <p>To set these up, we use <code>Slot0Configs</code>. This allows you to have different slots for different gain sets.</p>
-
-    <pre><code>// 1. Create the configuration object
-var slot0Configs = new Slot0Configs();
-
-// 2. Set the gains
-slot0Configs.kP = 0.11; // An example value
-slot0Configs.kI = 0.0;
-slot0Configs.kD = 0.01;
-slot0Configs.kS = 0.24; // Volts to break friction
-slot0Configs.kV = 0.12; // Volts per rotation per second
-
-// 3. Apply the configs to the motor
-m_talonFX.getConfigurator().apply(slot0Configs);</code></pre>
+    <h2>3. How to Tune Feedforward</h2>
+    <ol>
+        <li><strong>Start with kS:</strong> Raise it until the mechanism just starts moving instead of humming.</li>
+        <li><strong>Tune kV:</strong> Command a steady speed and adjust until the real speed is close to the setpoint.</li>
+        <li><strong>Add kG:</strong> For arms or elevators, adjust until the mechanism can hold position without falling.</li>
+        <li><strong>Add kA last:</strong> Use it only when acceleration matters and the mechanism lags while speeding up.</li>
+    </ol>
 
     <div class="nav-links">
-        <a href="CTRE_Feedforward.html">Previous: Feedforward</a>
-        <a href="../Sensors/Sensors_Overview.html">Next: Sensors</a>
+        <a href="CTRE_PID.html">Previous: PID</a>
+        <a href="CTRE_PID_Feedforward.html">Next: PID + Feedforward</a>
     </div>
 
 </body>

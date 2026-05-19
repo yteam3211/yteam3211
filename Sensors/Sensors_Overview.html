@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensors Overview</title>
+    <link rel="stylesheet" href="../course.css">
+    <script src="../sidebar.js" defer></script>
+</head>
+<body>
+<main>
+    <h1>Sensors</h1>
+    <p>Sensors are how robot code learns what is happening in the real world. Without sensors, commands can only guess. With sensors, the robot can close loops, zero mechanisms, detect game pieces, and drive accurately.</p>
+    <p>The most important habit with sensors is to always ask what the number means. A sensor value is only useful when you know the physical unit, where zero is, what direction is positive, and what the robot should do if the reading is wrong.</p>
+
+    <div class="course-grid">
+        <section class="course-card">
+            <h3>Relative Encoders</h3>
+            <p>Measure how far something has moved since startup or since the code last reset the position.</p>
+        </section>
+        <section class="course-card">
+            <h3>Absolute Encoders</h3>
+            <p>Measure a real mechanism angle even after the robot reboots.</p>
+        </section>
+        <section class="course-card">
+            <h3>Gyros</h3>
+            <p>Measure robot heading and rotation rate. Drivetrain code depends on this for field-relative driving and auto paths.</p>
+        </section>
+        <section class="course-card">
+            <h3>Limit Switches</h3>
+            <p>Detect hard mechanism endpoints and help safely zero arms, elevators, and climbers.</p>
+        </section>
+        <section class="course-card">
+            <h3>Beam Breaks</h3>
+            <p>Detect game pieces in intakes, indexers, and shooters.</p>
+        </section>
+        <section class="course-card">
+            <h3>Distance Sensors</h3>
+            <p>Measure how far the robot or mechanism is from an object.</p>
+        </section>
+        <section class="course-card">
+            <h3>Vision</h3>
+            <p>Detect targets, estimate robot pose, and help line up to field elements.</p>
+        </section>
+    </div>
+
+    <hr>
+
+    <h2>1. Relative Encoders</h2>
+    <p>A relative encoder measures movement from a starting point. TalonFX motors have built-in relative encoders, so you can read motor position and velocity without adding another sensor.</p>
+    <ul>
+        <li><strong>Used for:</strong> flywheels, drivetrain wheels, elevators, and any mechanism where motor movement tells you mechanism movement.</li>
+        <li><strong>Common units:</strong> motor rotations, mechanism rotations, meters, degrees, radians, rotations per second, or meters per second.</li>
+        <li><strong>Important problem:</strong> after reboot, a relative encoder does not automatically know the real mechanism position.</li>
+    </ul>
+    <pre><code>// Example idea: convert motor rotations to mechanism rotations
+double mechanismRotations = motorRotations / gearRatio;</code></pre>
+
+    <h2>2. Absolute Encoders</h2>
+    <p>An absolute encoder reports a real position within one full rotation. If an arm is at 35 degrees when the robot turns on, the absolute encoder can tell you that immediately.</p>
+    <ul>
+        <li><strong>Used for:</strong> arms, wrists, swerve module steering, and mechanisms that must know their angle at boot.</li>
+        <li><strong>Common units:</strong> rotations from 0 to 1, degrees from 0 to 360, or radians from 0 to 2 pi.</li>
+        <li><strong>Important problem:</strong> you usually need an offset so sensor zero matches mechanism zero.</li>
+    </ul>
+    <pre><code>// Example idea: apply an offset to make sensor zero match the robot
+double armDegrees = absoluteEncoderDegrees - armZeroOffsetDegrees;</code></pre>
+
+    <h2>3. Gyros</h2>
+    <p>A gyro measures robot rotation. In FRC, this is usually the sensor that tells code which way the robot is facing on the field.</p>
+    <ul>
+        <li><strong>Used for:</strong> field-relative driving, auto path following, balancing, turning to angles, and pose estimation.</li>
+        <li><strong>Common units:</strong> degrees or radians.</li>
+        <li><strong>Important problem:</strong> teams must agree on clockwise vs. counterclockwise and when the heading is reset.</li>
+    </ul>
+    <pre><code>// Example idea: zero heading before a match or at a known pose
+gyro.reset();</code></pre>
+
+    <h2>4. Limit Switches</h2>
+    <p>A limit switch is a simple digital sensor. It is either pressed or not pressed. This makes it extremely useful for safety and zeroing.</p>
+    <ul>
+        <li><strong>Used for:</strong> elevator bottom detection, climber end stops, intake deployed position, and homing routines.</li>
+        <li><strong>Common units:</strong> boolean values: <code>true</code> or <code>false</code>.</li>
+        <li><strong>Important problem:</strong> wiring can be normally open or normally closed, so check whether <code>true</code> means pressed or released.</li>
+    </ul>
+    <pre><code>if (bottomLimitSwitch.get()) {
+    elevatorEncoder.setPosition(0.0);
+}</code></pre>
+
+    <h2>5. Beam Breaks</h2>
+    <p>A beam break uses light to detect whether something is blocking the beam. In robot code, it is usually treated like a boolean sensor.</p>
+    <ul>
+        <li><strong>Used for:</strong> detecting notes/game pieces, checking if an intake is full, indexing, and shooter readiness.</li>
+        <li><strong>Common units:</strong> boolean values: object present or object missing.</li>
+        <li><strong>Important problem:</strong> some sensors return <code>false</code> when blocked, so name your variables clearly.</li>
+    </ul>
+    <pre><code>boolean hasGamePiece = !beamBreak.get();</code></pre>
+
+    <h2>6. Distance Sensors</h2>
+    <p>Distance sensors estimate how far away something is. They can be useful, but they are often noisier than new programmers expect.</p>
+    <ul>
+        <li><strong>Used for:</strong> detecting objects, measuring mechanism position without contact, and simple alignment checks.</li>
+        <li><strong>Common units:</strong> millimeters, centimeters, meters, or inches.</li>
+        <li><strong>Important problem:</strong> readings can change depending on surface color, angle, lighting, and reflections.</li>
+    </ul>
+
+    <h2>7. Vision</h2>
+    <p>Vision systems use cameras to detect field targets, AprilTags, retroreflective tape, or game pieces. Vision is powerful, but it should not be treated like magic truth.</p>
+    <ul>
+        <li><strong>Used for:</strong> aiming, robot pose estimation, auto alignment, and finding game pieces.</li>
+        <li><strong>Common units:</strong> target angle, target distance, robot pose, latency, and confidence.</li>
+        <li><strong>Important problem:</strong> vision has delay. Always think about when the image was captured, not just when the robot code received it.</li>
+    </ul>
+
+    <hr>
+
+    <h2>Sensor Questions To Ask</h2>
+    <ul>
+        <li>What physical thing does this sensor measure?</li>
+        <li>What unit does the code use?</li>
+        <li>Does the sensor need to be zeroed?</li>
+        <li>What should happen if the sensor is unplugged or wrong?</li>
+        <li>Can the robot safely move if this sensor is lying?</li>
+        <li>Should this value be logged for debugging?</li>
+    </ul>
+
+    <section class="mission">
+        <h3>Mission 1</h3>
+        <p>Design a safe elevator zeroing sequence using a motor, encoder, and limit switch. Write the steps in English before writing code.</p>
+    </section>
+
+    <section class="mission">
+        <h3>Mission 2</h3>
+        <p>Pick one mechanism on the robot and make a sensor table for it. Include the sensor name, what it measures, the unit, where zero is, and what the code should do if the value is impossible.</p>
+    </section>
+
+    <div class="nav-links">
+        <a href="../Ctre/CTRE_PID_Feedforward.html">Previous: PID + Feedforward</a>
+        <a href="../Mechanisms/Mechanisms_Overview.html">Next: Mechanisms</a>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomous Overview</title>
+    <link rel="stylesheet" href="../course.css">
+    <script src="../sidebar.js" defer></script>
+</head>
+<body>
+<main>
+    <h1>Autonomous With PathPlanner</h1>
+    <p>PathPlanner is the tool we use to design and run autonomous routines. Instead of writing every auto movement by hand, we draw paths on the field, connect robot commands to points in the path, and let PathPlannerLib generate the command that follows the plan.</p>
+    <p>The important idea is this: PathPlanner does not replace robot code. It connects to robot code. The drivetrain still needs odometry, a gyro, wheel/module states, and a correctly configured <code>AutoBuilder</code>.</p>
+
+    <div class="course-grid">
+        <section class="course-card">
+            <h3>Paths</h3>
+            <p>Draw where the robot should drive and what direction it should face.</p>
+        </section>
+        <section class="course-card">
+            <h3>Autos</h3>
+            <p>Combine paths, waits, and commands into a full autonomous routine.</p>
+        </section>
+        <section class="course-card">
+            <h3>Named Commands</h3>
+            <p>Run robot actions like intake, shoot, score, or stow from inside a PathPlanner auto.</p>
+        </section>
+        <section class="course-card">
+            <h3>Auto Chooser</h3>
+            <p>Let drivers select which auto to run before the match starts.</p>
+        </section>
+        <section class="course-card">
+            <h3>Pathfinding</h3>
+            <p>Ask the robot to generate a route to a target pose during the match.</p>
+        </section>
+        <section class="course-card">
+            <h3>Debugging</h3>
+            <p>Use logs, field visualization, and simulation to check pose, path, and command timing.</p>
+        </section>
+    </div>
+
+    <hr>
+
+    <h2>1. What PathPlanner Needs From The Robot</h2>
+    <p>PathPlanner can only follow a path if your drivetrain can answer these questions:</p>
+    <ul>
+        <li><strong>Where am I?</strong> The robot pose from odometry or pose estimation.</li>
+        <li><strong>How fast am I moving?</strong> Chassis speeds or module states.</li>
+        <li><strong>How do I drive?</strong> A method that accepts target speeds and sends outputs to the drivetrain.</li>
+        <li><strong>How do I reset pose?</strong> A method that sets the robot pose to the auto starting pose.</li>
+        <li><strong>Which alliance am I on?</strong> So paths can be mirrored correctly when needed.</li>
+    </ul>
+
+    <h2>2. AutoBuilder</h2>
+    <p><code>AutoBuilder</code> is the bridge between your drivetrain code and PathPlanner. You configure it once, usually from the drivetrain or <code>RobotContainer</code>, then PathPlanner can build commands for paths and autos.</p>
+    <pre><code>// Simplified idea, not a complete drivetrain config
+AutoBuilder.configure(
+    drive::getPose,
+    drive::resetPose,
+    drive::getRobotRelativeSpeeds,
+    drive::driveRobotRelative,
+    controllerConfig,
+    shouldFlipPath,
+    drive
+);</code></pre>
+    <p>If <code>AutoBuilder</code> is wrong, every auto will be wrong. Start debugging there before blaming the path.</p>
+
+    <h2>3. Following One Path</h2>
+    <p>The smallest PathPlanner test is a single path. This is useful before building a full auto because it checks that the drivetrain can follow the planned movement.</p>
+    <pre><code>PathPlannerPath path = PathPlannerPath.fromPathFile("Test Path");
+Command followPath = AutoBuilder.followPath(path);</code></pre>
+    <p>Test one simple path first: drive forward one or two meters. If that does not work, a complex multi-piece auto will not work either.</p>
+
+    <h2>4. Building A Full Auto</h2>
+    <p>A full auto can contain paths, waits, and commands. PathPlanner stores these in deploy files, and the robot loads them by name.</p>
+    <pre><code>Command auto = new PathPlannerAuto("Center Start 2 Piece");</code></pre>
+    <p>For driver selection, use an auto chooser so the drive team can pick the routine on the dashboard before the match.</p>
+
+    <h2>5. Named Commands</h2>
+    <p>Named commands let the PathPlanner GUI trigger real robot commands. For example, the path can tell the robot to intake while driving, shoot at a marker, or stow an arm before the next path.</p>
+    <pre><code>NamedCommands.registerCommand("Intake", new IntakeCommand(intake));
+NamedCommands.registerCommand("Shoot", new ShootCommand(shooter));
+NamedCommands.registerCommand("Stow", new StowArmCommand(arm));</code></pre>
+    <p>Register named commands before loading autos. If the names do not match exactly, the auto may skip the action or fail.</p>
+
+    <h2>6. PathPlanner Uses</h2>
+    <ul>
+        <li><strong>Simple autonomous:</strong> leave the starting area or drive to a scoring location.</li>
+        <li><strong>Multi-piece autonomous:</strong> score, drive to a game piece, intake, return, and score again.</li>
+        <li><strong>Auto alignment:</strong> generate or follow a route to a field target.</li>
+        <li><strong>Mechanism timing:</strong> start spinning a shooter before the robot reaches the shot location.</li>
+        <li><strong>Driver assist:</strong> use pathfinding or short paths to help drivers line up.</li>
+        <li><strong>Simulation testing:</strong> verify pose movement and command timing without the robot.</li>
+    </ul>
+
+    <h2>7. Common PathPlanner Mistakes</h2>
+    <ul>
+        <li><strong>Wrong starting pose:</strong> the robot starts somewhere different from where the auto thinks it starts.</li>
+        <li><strong>Gyro direction is reversed:</strong> paths curve or rotate the wrong way.</li>
+        <li><strong>Bad units:</strong> drivetrain code mixes meters, rotations, degrees, or radians.</li>
+        <li><strong>Autos not deployed:</strong> the robot does not have the path files in the deploy folder.</li>
+        <li><strong>Named command mismatch:</strong> the GUI name and Java registered name are not identical.</li>
+        <li><strong>Command requirements conflict:</strong> an event command interrupts the path because both require the drivetrain.</li>
+        <li><strong>No testing space:</strong> the path is too fast or too long for the available area.</li>
+    </ul>
+
+    <h2>8. Debugging Checklist</h2>
+    <ol>
+        <li>Test drivetrain driving manually first.</li>
+        <li>Verify gyro heading direction.</li>
+        <li>Verify odometry moves correctly when the robot moves.</li>
+        <li>Follow a short straight path.</li>
+        <li>Follow a short curved path.</li>
+        <li>Add one named command.</li>
+        <li>Build the full auto only after the small tests pass.</li>
+        <li>Log pose, setpoint pose, chassis speeds, and active command names.</li>
+    </ol>
+
+    <section class="mission">
+        <h3>Mission 1</h3>
+        <p>Design a PathPlanner auto on paper: starting pose, first path, named command, second path, and ending pose. Do not write code yet.</p>
+    </section>
+
+    <section class="mission">
+        <h3>Mission 2</h3>
+        <p>Make a list of named commands your robot would need for a two-piece auto. Include intake, shoot, stow, and any wait-until-ready behavior.</p>
+    </section>
+
+    <section class="note">
+        <h3>Reference</h3>
+        <p>Use the official <a href="https://pathplanner.dev/pplib-getting-started.html" target="_blank">PathPlannerLib Getting Started</a>, <a href="https://pathplanner.dev/pplib-build-an-auto.html" target="_blank">Build an Auto</a>, and <a href="https://pathplanner.dev/pplib-follow-a-single-path.html" target="_blank">Follow a Single Path</a> docs when implementing the real robot code.</p>
+    </section>
+
+    <div class="nav-links">
+        <a href="../Mechanisms/Mechanisms_Overview.html">Previous: Mechanisms</a>
+        <a href="../Simulation/Simulation_Overview.html">Next: Simulation</a>
+    </div>
+</main>
+</body>
+</html>

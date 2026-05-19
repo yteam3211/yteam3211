@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrcCatalyst Team Library</title>
+    <link rel="stylesheet" href="../course.css">
+    <script src="../sidebar.js" defer></script>
+</head>
+<body>
+<main>
+    <h1>FrcCatalyst Team Library</h1>
+    <p>FrcCatalyst is the team library we use to create common FRC mechanisms faster. Instead of writing every motor controller, PID loop, feedforward, simulation model, telemetry path, and safety check from scratch, students configure a mechanism with a builder.</p>
+    <p>This chapter comes after WPILib, CTRE, simulation, and AdvantageKit because FrcCatalyst combines ideas from all of them. It is easier to trust the library when you understand what it is doing underneath.</p>
+
+    <section class="note">
+        <h3>Generator Tool</h3>
+        <p>Use the local <a href="../frc-catalyst-subsystem-generator.html">FRC Catalyst Subsystem Generator</a> to create starter Java snippets. The generator is connected to the mechanism builder calls in the <a href="https://github.com/TomAs-1226/FrcCatalyst" target="_blank">FrcCatalyst GitHub repo</a>.</p>
+    </section>
+
+    <h2>What FrcCatalyst Gives Us</h2>
+    <ul>
+        <li><strong>Mechanism builders:</strong> Configure elevators, arms, shooters, rollers, climbers, claws, pneumatics, and differential wrists.</li>
+        <li><strong>Telemetry:</strong> Mechanism data is published in a predictable Catalyst layout for debugging.</li>
+        <li><strong>Simulation support:</strong> Mechanisms can use physical data such as motor type, gearing, mass, radius, and moment of inertia.</li>
+        <li><strong>Safety checks:</strong> Current limits, temperature limits, limit switches, and stall detection are part of the config instead of scattered across code.</li>
+        <li><strong>Command helpers:</strong> Mechanisms expose commands like holding position or moving to named positions.</li>
+    </ul>
+
+    <h2>Mechanism Map</h2>
+    <ul>
+        <li><code>LinearMechanism</code>: elevators, slides, and telescoping mechanisms.</li>
+        <li><code>RotationalMechanism</code>: arms, wrists, turrets, hoods, and pivots.</li>
+        <li><code>FlywheelMechanism</code>: shooters and accelerator wheels.</li>
+        <li><code>RollerMechanism</code>: intakes, conveyors, and indexers.</li>
+        <li><code>WinchMechanism</code>: climbers and rope/spool systems.</li>
+        <li><code>ClawMechanism</code>: motor-driven grippers with stall or beam-break detection.</li>
+        <li><code>PneumaticMechanism</code>: single or double solenoid mechanisms.</li>
+        <li><code>DifferentialWristMechanism</code>: two-motor wrists with pitch and roll control.</li>
+    </ul>
+
+    <h2>Basic Workflow</h2>
+    <ol>
+        <li>Choose the mechanism type that matches the real robot part.</li>
+        <li>Open the <a href="../frc-catalyst-subsystem-generator.html">FRC Catalyst Subsystem Generator</a>.</li>
+        <li>Enter CAN IDs, motor type, gearing, limits, PID, feedforward, and named positions.</li>
+        <li>Copy the generated Java instance into the robot project.</li>
+        <li>Bind the mechanism commands in <code>RobotContainer</code>.</li>
+        <li>Test in simulation, then tune carefully on the real robot.</li>
+    </ol>
+
+    <h2>Example: Elevator</h2>
+    <p>A Catalyst elevator starts as one builder config. The important part is that every number should come from the real mechanism or from a tuning decision.</p>
+
+    <pre><code>import frc.lib.catalyst.hardware.MotorType;
+import frc.lib.catalyst.mechanisms.LinearMechanism;
+
+private final LinearMechanism elevator = new LinearMechanism(
+    LinearMechanism.Config.builder()
+        .name("Elevator")
+        .motor(13)
+        .follower(14, true)
+        .motorType(MotorType.KRAKEN_X60)
+        .gearRatio(10.0)
+        .drumRadius(0.0254)
+        .range(0.0, 1.2)
+        .mass(5.0)
+        .pid(50.0, 0.0, 0.5)
+        .gravityGain(0.35)
+        .motionMagic(2.0, 4.0, 20.0)
+        .currentLimit(40)
+        .reverseLimitSwitch(0, true)
+        .maxTemperature(70)
+        .position("STOW", 0.0)
+        .position("AMP", 0.8)
+        .position("HIGH", 1.1)
+        .build()
+);</code></pre>
+
+    <p><strong>What each group means:</strong></p>
+    <ul>
+        <li><code>motor</code>, <code>follower</code>, and <code>motorType</code> describe the hardware.</li>
+        <li><code>gearRatio</code>, <code>drumRadius</code>, <code>range</code>, and <code>mass</code> describe the physical elevator.</li>
+        <li><code>pid</code>, <code>gravityGain</code>, and <code>motionMagic</code> describe how the elevator should move.</li>
+        <li><code>currentLimit</code>, <code>reverseLimitSwitch</code>, and <code>maxTemperature</code> protect the robot.</li>
+        <li><code>position</code> creates named goals that commands can use later.</li>
+    </ul>
+
+    <h2>Using The Mechanism</h2>
+    <p>Once the mechanism exists, students should use its commands from <code>RobotContainer</code> instead of manually setting motor power everywhere.</p>
+
+    <pre><code>private void configureBindings() {
+    elevator.setDefaultCommand(elevator.holdPosition());
+
+    operatorController.a().onTrue(elevator.goTo("AMP"));
+    operatorController.b().onTrue(elevator.goTo("HIGH"));
+    operatorController.x().onTrue(elevator.goTo("STOW"));
+}</code></pre>
+
+    <p><strong>Why this matters:</strong> commands describe robot actions. The mechanism config owns the motor details, limits, tuning, and safety behavior.</p>
+
+    <h2>How To Use The Generator</h2>
+    <ul>
+        <li><strong>Mechanism:</strong> Pick the real mechanism type first. Do not force an arm into an elevator config.</li>
+        <li><strong>Catalyst name:</strong> Use the same name drivers and programmers use, such as <code>Elevator</code>, <code>Arm</code>, or <code>Intake</code>.</li>
+        <li><strong>Builder calls:</strong> Fill in the values you know. Leave unknown tuning values conservative until testing.</li>
+        <li><strong>Named positions:</strong> Use clear names like <code>STOW</code>, <code>INTAKE</code>, <code>AMP</code>, and <code>HIGH</code>.</li>
+        <li><strong>Followers:</strong> Add follower motors only when the physical mechanism really has them.</li>
+        <li><strong>Generated Java:</strong> Copy the snippet, then clean up imports and constants in the robot project.</li>
+    </ul>
+
+    <h2>Good Team Rules</h2>
+    <ul>
+        <li>Do not use FrcCatalyst as magic. Know what mechanism, motor, sensor, and control loop it represents.</li>
+        <li>Put CAN IDs and important physical constants in one clear location.</li>
+        <li>Start with safe limits before tuning for speed.</li>
+        <li>Test named positions one at a time.</li>
+        <li>Commit working configs after each successful tuning step.</li>
+        <li>When the generator output does not compile, fix the page or the snippet instead of silently rewriting the library pattern.</li>
+    </ul>
+
+    <section class="mission">
+        <h3>Mission 1</h3>
+        <p>Open the generator and create a <code>RollerMechanism</code> for an intake. Include motor ID, current limit, intake speed, eject speed, and one detection method.</p>
+    </section>
+
+    <section class="mission">
+        <h3>Mission 2</h3>
+        <p>Create a <code>RotationalMechanism</code> for an arm. Add real-looking range limits, one named <code>STOW</code> position, one named scoring position, PID values, and a max temperature limit.</p>
+    </section>
+
+    <section class="note">
+        <h3>Reference</h3>
+        <p>Use the <a href="https://github.com/TomAs-1226/FrcCatalyst" target="_blank">FrcCatalyst GitHub repo</a> and the local <a href="../frc-catalyst-subsystem-generator.html">FRC Catalyst Subsystem Generator</a> when building real robot mechanisms.</p>
+    </section>
+
+    <div class="nav-links">
+        <a href="../AdvantageKit/AdvantageKit_Overview.html">Previous: AdvantageKit</a>
+        <a href="../index.html">Next: Home</a>
+    </div>
+</main>
+</body>
+</html>

@@ -141,6 +141,12 @@
       grid-column: 1 / -1;
     }
 
+    .subfield {
+      display: grid;
+      gap: 5px;
+      min-width: 0;
+    }
+
     .field label,
     .check label {
       color: #263445;
@@ -667,7 +673,7 @@
           triple("pid", "PID", "0.7", "0", "0", ".pid", "kP", "kI", "kD"),
           triple("feedforward", "Feedforward", "0.12", "0.0", "0.0", ".feedforward", "kS", "kV", "kA"),
           num("gravityGain", "Gravity gain", "", ".gravityGain"),
-          triple("motionMagic", "Motion Magic", "80", "160", "1600", ".motionMagic", "cruise", "accel", "jerk"),
+          triple("motionMagic", "Motion Magic", "80", "160", "1600", ".motionMagic", "Cruise velocity", "Acceleration", "Jerk"),
           num("forwardLimitSwitch", "Forward limit DIO", "", ".forwardLimitSwitch"),
           bool("forwardAutoZero", "Forward auto-zero", false),
           num("reverseLimitSwitch", "Reverse limit DIO", "", ".reverseLimitSwitch"),
@@ -705,7 +711,7 @@
           triple("pid", "PID", "0.5", "0", "0", ".pid", "kP", "kI", "kD"),
           triple("feedforward", "Feedforward", "0.1", "0.0", "0.0", ".feedforward", "kS", "kV", "kA"),
           num("gravityGain", "Gravity gain", "0.25", ".gravityGain"),
-          triple("motionMagic", "Motion Magic", "1.2", "2.4", "24", ".motionMagic", "cruise", "accel", "jerk"),
+          triple("motionMagic", "Motion Magic", "1.2", "2.4", "24", ".motionMagic", "Cruise velocity", "Acceleration", "Jerk"),
           num("hardStopPort", "Hard stop DIO", "", ".hardStop"),
           bool("hardStopAutoZero", "Hard stop auto-zero", false),
           num("hardStopHomeAngle", "Home angle", "0"),
@@ -836,7 +842,7 @@
           num("statorCurrentLimit", "Stator limit amps", "", ".statorCurrentLimit"),
           triple("pid", "PID", "0.4", "0", "0", ".pid", "kP", "kI", "kD"),
           triple("feedforward", "Feedforward", "0.08", "0", "0", ".feedforward", "kS", "kV", "kA"),
-          triple("motionMagic", "Motion Magic", "1.2", "2.4", "24", ".motionMagic", "cruise", "accel", "jerk"),
+          triple("motionMagic", "Motion Magic", "1.2", "2.4", "24", ".motionMagic", "Cruise velocity", "Acceleration", "Jerk"),
           num("tolerance", "Tolerance degrees", "2", ".tolerance")
         ]
       }
@@ -1010,6 +1016,31 @@
       return fieldHelp[def.label]?.[id] || fieldHelp.common[id] || "Explains what this field controls in the generated builder call.";
     }
 
+    function getTripleInputHelp(field, index) {
+      if (field.id === "motionMagic") {
+        return [
+          "Cruise velocity is the maximum planned speed of the mechanism during the Motion Magic move.",
+          "Acceleration is how quickly the profile is allowed to speed up or slow down.",
+          "Jerk is how quickly acceleration is allowed to change. Higher jerk feels snappier; lower jerk feels smoother."
+        ][index];
+      }
+      if (field.id === "pid") {
+        return [
+          "kP corrects based on current error.",
+          "kI corrects error that has built up over time. Use carefully.",
+          "kD corrects based on how quickly the error is changing."
+        ][index];
+      }
+      if (field.id === "feedforward") {
+        return [
+          "kS helps overcome static friction.",
+          "kV scales with velocity.",
+          "kA scales with acceleration."
+        ][index];
+      }
+      return `${field.labels[index]} value for ${field.label}.`;
+    }
+
     function renderLabel(label, help, forId = "") {
       const attr = forId ? ` for="${forId}"` : "";
       return `<label class="label-row"${attr}>${escapeHtml(label)} <span class="help-chip" tabindex="0" data-help="${escapeHtml(help)}">?</span></label>`;
@@ -1127,13 +1158,21 @@
         }
 
         if (field.type === "triple") {
+          const inputs = field.labels.map((label, index) => {
+            const suffix = String.fromCharCode(65 + index);
+            const help = getTripleInputHelp(field, index);
+            const value = field.value[index];
+            return `
+                <div class="subfield">
+                  ${renderLabel(label, help)}
+                  <input data-field="${field.id}${suffix}" value="${value}" placeholder="${label}" title="${escapeHtml(help)}" aria-label="${escapeHtml(`${field.label} ${label}`)}">
+                </div>`;
+          }).join("");
           return `
             <div class="field full">
               ${renderGainLabel(def, field)}
               <div class="grid">
-                <input data-field="${field.id}A" value="${field.value[0]}" placeholder="${field.labels[0]}">
-                <input data-field="${field.id}B" value="${field.value[1]}" placeholder="${field.labels[1]}">
-                <input data-field="${field.id}C" value="${field.value[2]}" placeholder="${field.labels[2]}">
+${inputs}
               </div>
             </div>`;
         }
