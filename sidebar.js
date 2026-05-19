@@ -62,6 +62,10 @@
         }
         body.yteam-sidebar-ready {
             padding-left: calc(var(--yteam-sidebar-width) + 28px) !important;
+            transition: padding-left 0.2s ease;
+        }
+        body.yteam-sidebar-ready.yteam-sidebar-collapsed {
+            padding-left: 20px !important;
         }
         .yteam-sidebar {
             position: fixed;
@@ -72,9 +76,13 @@
             border-right: 1px solid #333;
             box-sizing: border-box;
             overflow-y: auto;
-            padding: 22px 18px;
+            padding: 64px 18px 22px 18px;
             text-align: left;
             z-index: 1000;
+            transition: transform 0.2s ease;
+        }
+        body.yteam-sidebar-collapsed .yteam-sidebar {
+            transform: translateX(-100%);
         }
         .yteam-sidebar__brand {
             display: flex;
@@ -125,7 +133,7 @@
             color: #000000;
         }
         .yteam-sidebar-toggle {
-            display: none;
+            display: block;
             position: fixed;
             top: 12px;
             left: 12px;
@@ -134,9 +142,37 @@
             background: #101010;
             color: #ffffff;
             border-radius: 6px;
-            padding: 8px 10px;
+            padding: 8px;
             font: 700 16px/1 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             cursor: pointer;
+            width: 42px;
+            height: 38px;
+            align-items: center;
+            justify-content: center;
+        }
+        .yteam-sidebar-toggle__lines,
+        .yteam-sidebar-toggle__lines::before,
+        .yteam-sidebar-toggle__lines::after {
+            display: block;
+            width: 20px;
+            height: 2px;
+            border-radius: 999px;
+            background: currentColor;
+        }
+        .yteam-sidebar-toggle__lines {
+            position: relative;
+        }
+        .yteam-sidebar-toggle__lines::before,
+        .yteam-sidebar-toggle__lines::after {
+            content: "";
+            position: absolute;
+            left: 0;
+        }
+        .yteam-sidebar-toggle__lines::before {
+            top: -7px;
+        }
+        .yteam-sidebar-toggle__lines::after {
+            top: 7px;
         }
         @media (max-width: 760px) {
             body.yteam-sidebar-ready {
@@ -145,13 +181,9 @@
             }
             .yteam-sidebar {
                 transform: translateX(-100%);
-                transition: transform 0.2s ease;
             }
             body.yteam-sidebar-open .yteam-sidebar {
                 transform: translateX(0);
-            }
-            .yteam-sidebar-toggle {
-                display: block;
             }
         }
     `;
@@ -159,6 +191,8 @@
 
     const makeUrl = (path) => new URL(path, siteRoot).href;
     const currentPath = new URL(window.location.href).pathname.replace(/\/+$/, "");
+    const storageKey = "yteam-sidebar-collapsed";
+    const smallScreenQuery = window.matchMedia("(max-width: 760px)");
 
     const sidebar = document.createElement("aside");
     sidebar.className = "yteam-sidebar";
@@ -186,6 +220,7 @@
             link.className = "yteam-sidebar__link";
             link.href = href;
             link.textContent = label;
+            link.title = label;
             if (linkPath === currentPath) {
                 link.classList.add("is-active");
                 link.setAttribute("aria-current", "page");
@@ -201,13 +236,60 @@
     toggle.type = "button";
     toggle.setAttribute("aria-label", "Toggle navigation");
     toggle.setAttribute("aria-expanded", "false");
-    toggle.textContent = "Menu";
+    toggle.innerHTML = `<span class="yteam-sidebar-toggle__lines" aria-hidden="true"></span>`;
+
+    const readSavedCollapsed = () => {
+        try {
+            return window.localStorage.getItem(storageKey) === "true";
+        } catch {
+            return false;
+        }
+    };
+
+    const saveCollapsed = (isCollapsed) => {
+        try {
+            window.localStorage.setItem(storageKey, String(isCollapsed));
+        } catch {
+            // Ignore storage errors on locked-down browsers or local files.
+        }
+    };
+
+    const updateToggle = () => {
+        const isSmall = smallScreenQuery.matches;
+        const isOpen = document.body.classList.contains("yteam-sidebar-open");
+        const isCollapsed = document.body.classList.contains("yteam-sidebar-collapsed");
+
+        if (isSmall) {
+            toggle.setAttribute("aria-expanded", String(isOpen));
+            toggle.setAttribute("aria-label", isOpen ? "Close navigation" : "Open navigation");
+            return;
+        }
+
+        toggle.setAttribute("aria-expanded", String(!isCollapsed));
+        toggle.setAttribute("aria-label", isCollapsed ? "Show navigation" : "Hide navigation");
+    };
+
     toggle.addEventListener("click", () => {
-        const isOpen = document.body.classList.toggle("yteam-sidebar-open");
-        toggle.setAttribute("aria-expanded", String(isOpen));
+        if (smallScreenQuery.matches) {
+            document.body.classList.toggle("yteam-sidebar-open");
+        } else {
+            document.body.classList.remove("yteam-sidebar-open");
+            const isCollapsed = document.body.classList.toggle("yteam-sidebar-collapsed");
+            saveCollapsed(isCollapsed);
+        }
+        updateToggle();
+    });
+
+    smallScreenQuery.addEventListener("change", () => {
+        document.body.classList.remove("yteam-sidebar-open");
+        updateToggle();
     });
 
     document.body.insertBefore(sidebar, document.body.firstChild);
     document.body.insertBefore(toggle, sidebar);
+    if (readSavedCollapsed()) {
+        document.body.classList.add("yteam-sidebar-collapsed");
+    }
     document.body.classList.add("yteam-sidebar-ready");
+    updateToggle();
 })();
