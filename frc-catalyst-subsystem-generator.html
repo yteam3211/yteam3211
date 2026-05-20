@@ -6,20 +6,20 @@
   <title>FRC Catalyst Subsystem Generator</title>
   <style>
     :root {
-      color-scheme: light;
+      color-scheme: dark;
       --bg: #000000;
-      --panel: #ffffff;
-      --panel-2: #f0f4f8;
-      --ink: #17202a;
-      --muted: #64748b;
-      --line: #d8e0ea;
-      --accent: #0f766e;
-      --accent-2: #b45309;
-      --danger: #b91c1c;
+      --panel: #111827;
+      --panel-2: #17202a;
+      --ink: #f8fafc;
+      --muted: #a7b3c4;
+      --line: #334155;
+      --accent: #2dd4bf;
+      --accent-2: #f59e0b;
+      --danger: #fb7185;
       --code: #121826;
       --code-ink: #d7e2f0;
-      --focus: 0 0 0 3px rgba(15, 118, 110, 0.22);
-      --shadow: 0 18px 44px rgba(15, 23, 42, 0.12);
+      --focus: 0 0 0 3px rgba(45, 212, 191, 0.24);
+      --shadow: 0 18px 44px rgba(0, 0, 0, 0.36);
     }
 
     * {
@@ -156,7 +156,7 @@
 
     .field label,
     .check label {
-      color: #263445;
+      color: #cbd5e1;
       font-size: 12px;
       font-weight: 800;
       text-transform: uppercase;
@@ -177,9 +177,9 @@
       width: 18px;
       height: 18px;
       border-radius: 999px;
-      border: 1px solid #94a3b8;
-      background: #fff;
-      color: #475569;
+      border: 1px solid #64748b;
+      background: #0b1220;
+      color: #cbd5e1;
       font-size: 11px;
       font-weight: 800;
       line-height: 1;
@@ -223,7 +223,7 @@
       width: 100%;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: #fff;
+      background: #0b1220;
       color: var(--ink);
       padding: 10px 11px;
       min-height: 42px;
@@ -253,7 +253,7 @@
       padding: 10px 11px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: #fff;
+      background: #0b1220;
     }
 
     .check input {
@@ -299,7 +299,7 @@
     }
 
     .row-head span {
-      color: #263445;
+      color: #cbd5e1;
       font-size: 12px;
       font-weight: 800;
       text-transform: uppercase;
@@ -344,15 +344,15 @@
     }
 
     .ghost {
-      background: #fff;
+      background: #0b1220;
       color: var(--accent);
       border-color: var(--line);
     }
 
     .danger {
-      background: #fff1f2;
+      background: #2b1117;
       color: var(--danger);
-      border-color: #fecdd3;
+      border-color: #7f1d1d;
       padding-inline: 0;
       width: 42px;
     }
@@ -410,13 +410,13 @@
       padding: 12px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: #f8fafc;
+      background: #0b1220;
       font-size: 13px;
       line-height: 1.45;
     }
 
     .gain-result strong {
-      color: #263445;
+      color: #e2e8f0;
     }
 
     .gain-result ul {
@@ -472,8 +472,8 @@
       min-height: 26px;
       border-radius: 999px;
       padding: 4px 10px;
-      background: #e0f2f1;
-      color: #115e59;
+      background: #083b37;
+      color: #99f6e4;
       font-size: 12px;
       font-weight: 800;
     }
@@ -526,8 +526,8 @@
       <div>
         <h1>FRC Catalyst Subsystem Generator</h1>
         <p class="subhead">
-          Configure a FrcCatalyst mechanism on the left, then copy the generated Java instance snippet on the right.
-          Builder calls are based on the mechanism files in the FrcCatalyst library.
+          Configure a FrcCatalyst mechanism on the left, then copy the generated Java helper class on the right.
+          Builder calls and helper methods are based on the mechanism files in the FrcCatalyst library.
         </p>
       </div>
       <a class="source-link" href="https://github.com/TomAs-1226/FrcCatalyst/tree/main/src/main/java/frc/lib/catalyst/mechanisms" target="_blank" rel="noreferrer">FrcCatalyst mechanisms</a>
@@ -547,8 +547,8 @@
               <select id="mechanism"></select>
             </div>
             <div class="field">
-              <label class="label-row" for="variableName">Variable name <span class="help-chip" tabindex="0" data-help="This is the Java variable name for the mechanism instance. It is generated automatically from the Catalyst name.">?</span></label>
-              <input id="variableName" value="elevator" autocomplete="off" readonly>
+              <label class="label-row" for="variableName">Class name <span class="help-chip" tabindex="0" data-help="This is the Java class name for the generated helper file. It is generated automatically from the Catalyst name.">?</span></label>
+              <input id="variableName" value="Elevator" autocomplete="off" readonly>
             </div>
             <div class="field">
               <label class="label-row" for="catalystName">Catalyst name <span class="help-chip" tabindex="0" data-help="Sets the value used in .name(...). This is the mechanism name shown in logs, tuning, and alerts.">?</span></label>
@@ -586,7 +586,7 @@
 
       <section class="panel">
         <div class="panel-title">
-          <h2>Generated Java Instance</h2>
+          <h2>Generated Java Class</h2>
           <div class="btn-row">
             <button type="button" class="ghost" id="copyCode">Copy</button>
             <button type="button" id="downloadCode">Download</button>
@@ -1086,21 +1086,36 @@
       return trimmed;
     }
 
-    function toVariableName(value) {
-      const words = String(value || "mechanism")
+    function toClassName(value) {
+      const words = String(value || "Mechanism")
         .replace(/[^A-Za-z0-9]+/g, " ")
         .trim()
         .split(/\s+/)
         .filter(Boolean);
-      if (!words.length) return "mechanism";
+      if (!words.length) return "Mechanism";
       const joined = words
-        .map((word, index) => {
+        .map((word) => {
           const lower = word.toLowerCase();
-          if (index === 0) return lower;
           return lower.charAt(0).toUpperCase() + lower.slice(1);
         })
         .join("");
-      return /^[A-Za-z_$]/.test(joined) ? joined : "mechanism";
+      return /^[A-Za-z_$]/.test(joined) ? joined : "Mechanism";
+    }
+
+    function toMethodSuffix(value) {
+      const words = String(value || "Position")
+        .replace(/[^A-Za-z0-9]+/g, " ")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+      if (!words.length) return "Position";
+      const joined = words
+        .map((word) => {
+          const lower = word.toLowerCase();
+          return lower.charAt(0).toUpperCase() + lower.slice(1);
+        })
+        .join("");
+      return /^[A-Za-z_$]/.test(joined) ? joined : "Position";
     }
 
     function lineFromSingle(field, values) {
@@ -1125,7 +1140,6 @@
         }
       });
       values.catalystName = byId("catalystName").value.trim();
-      values.variableName = byId("variableName").value.trim();
       return values;
     }
 
@@ -1293,7 +1307,7 @@ ${inputs}
       const def = definitions[key];
       state.presets = (def.defaultPresets || []).map((preset) => ({ ...preset }));
       byId("catalystName").value = def.catalystName;
-      byId("variableName").value = toVariableName(def.catalystName);
+      byId("variableName").value = toClassName(def.catalystName);
       byId("mechanismBadge").textContent = def.label;
       byId("apiStatus").textContent = `${def.fields.length} configurable calls`;
       state.followers = [];
@@ -1667,14 +1681,257 @@ ${inputs}
       return [...lines, ...trailingLines];
     }
 
-    function generatedInstance(def, values) {
+    function positionNames(def) {
+      if (def.presetMode === "none") return [];
+      return state.presets
+        .map((preset) => preset.name)
+        .filter(Boolean);
+    }
+
+    function uniquePositionMethods(def) {
+      const used = new Set();
+      return positionNames(def).map((name) => {
+        const suffix = toMethodSuffix(name);
+        let methodName = `goTo${suffix}`;
+        let index = 2;
+        while (used.has(methodName)) {
+          methodName = `goTo${suffix}${index}`;
+          index += 1;
+        }
+        used.add(methodName);
+        return { name, methodName };
+      });
+    }
+
+    function extraImports(def) {
+      return def.label === "WinchMechanism"
+        ? "import java.util.function.DoubleSupplier;\n"
+        : "";
+    }
+
+    function commandHelpers(def, positionMethods) {
+      const helpers = [
+`    public static Command stop() {
+        return INSTANCE.stopCommand();
+    }`
+      ];
+
+      if (["LinearMechanism", "RotationalMechanism"].includes(def.label)) {
+        helpers.push(
+`    public static Command setPosition(double position) {
+        return INSTANCE.goTo(position);
+    }`,
+`    public static Command goTo(double position) {
+        return INSTANCE.goTo(position);
+    }`,
+`    public static Command goToAndWait(double position, double tolerance) {
+        return INSTANCE.goToAndWait(position, tolerance);
+    }`,
+`    public static Command holdPosition() {
+        return INSTANCE.holdPosition();
+    }`,
+`    public static Command zero() {
+        return INSTANCE.zero();
+    }`,
+`    public static Command goToProfiled(double position) {
+        return INSTANCE.goToProfiled(position);
+    }`,
+`    public static Command holdPositionProfiled() {
+        return INSTANCE.holdPositionProfiled();
+    }`
+        );
+      }
+
+      if (def.label === "DifferentialWristMechanism") {
+        helpers.push(
+`    public static Command setPosition(double pitchDegrees, double rollDegrees) {
+        return INSTANCE.goTo(pitchDegrees, rollDegrees);
+    }`,
+`    public static Command goTo(double pitchDegrees, double rollDegrees) {
+        return INSTANCE.goTo(pitchDegrees, rollDegrees);
+    }`,
+`    public static Command goToAndWait(double pitchDegrees, double rollDegrees) {
+        return INSTANCE.goToAndWait(pitchDegrees, rollDegrees);
+    }`,
+`    public static Command holdPosition() {
+        return INSTANCE.holdPosition();
+    }`,
+`    public static Command zero() {
+        return INSTANCE.zero();
+    }`
+        );
+      }
+
+      if (def.presetMode !== "none") {
+        helpers.push(
+`    public static Command setPosition(String positionName) {
+        return INSTANCE.goTo(positionName);
+    }`,
+`    public static Command goTo(String positionName) {
+        return INSTANCE.goTo(positionName);
+    }`
+        );
+
+        if (["LinearMechanism", "RotationalMechanism"].includes(def.label)) {
+          helpers.push(
+`    public static Command goToAndWait(String positionName, double tolerance) {
+        return INSTANCE.goToAndWait(positionName, tolerance);
+    }`,
+`    public static Command goToProfiled(String positionName) {
+        return INSTANCE.goToProfiled(positionName);
+    }`
+          );
+        }
+
+        positionMethods.forEach(({ name, methodName }) => {
+          helpers.push(
+`    public static Command ${methodName}() {
+        return goTo("${escapeJava(name)}");
+    }`
+          );
+        });
+      }
+
+      if (def.label === "FlywheelMechanism") {
+        helpers.push(
+`    public static Command spinUp(double velocityRPS) {
+        return INSTANCE.spinUp(velocityRPS);
+    }`,
+`    public static Command spinUp(double primaryRPS, double secondaryRPS) {
+        return INSTANCE.spinUp(primaryRPS, secondaryRPS);
+    }`,
+`    public static Command spinUpAndWait(double velocityRPS) {
+        return INSTANCE.spinUpAndWait(velocityRPS);
+    }`,
+`    public static Command runVoltage(double volts) {
+        return INSTANCE.runVoltage(volts);
+    }`
+        );
+      }
+
+      if (def.label === "RollerMechanism") {
+        helpers.push(
+`    public static Command intake() {
+        return INSTANCE.intake();
+    }`,
+`    public static Command intakeContinuous() {
+        return INSTANCE.intakeContinuous();
+    }`,
+`    public static Command eject() {
+        return INSTANCE.eject();
+    }`,
+`    public static Command runAtSpeed(double speed) {
+        return INSTANCE.runAtSpeed(speed);
+    }`,
+`    public static Command runAtVoltage(double volts) {
+        return INSTANCE.runAtVoltage(volts);
+    }`,
+`    public static Command resetPieceDetection() {
+        return INSTANCE.resetPieceDetection();
+    }`,
+`    public static Command intakeWithRamp(double rampTimeSeconds) {
+        return INSTANCE.intakeWithRamp(rampTimeSeconds);
+    }`,
+`    public static Command pulse(double onTimeSeconds, double offTimeSeconds, double speed) {
+        return INSTANCE.pulse(onTimeSeconds, offTimeSeconds, speed);
+    }`,
+`    public static Command feedVoltage(double volts) {
+        return INSTANCE.feedVoltage(volts);
+    }`
+        );
+      }
+
+      if (def.label === "ClawMechanism") {
+        helpers.push(
+`    public static Command close() {
+        return INSTANCE.close();
+    }`,
+`    public static Command closeUntilGripped() {
+        return INSTANCE.closeUntilGripped();
+    }`,
+`    public static Command hold() {
+        return INSTANCE.hold();
+    }`,
+`    public static Command open() {
+        return INSTANCE.open();
+    }`,
+`    public static Command runAtVoltage(double volts) {
+        return INSTANCE.runAtVoltage(volts);
+    }`,
+`    public static Command resetPieceDetection() {
+        return INSTANCE.resetPieceDetection();
+    }`
+        );
+      }
+
+      if (def.label === "PneumaticMechanism") {
+        helpers.push(
+`    public static Command extend() {
+        return INSTANCE.extend();
+    }`,
+`    public static Command retract() {
+        return INSTANCE.retract();
+    }`,
+`    public static Command off() {
+        return INSTANCE.off();
+    }`,
+`    public static Command toggle() {
+        return INSTANCE.toggle();
+    }`,
+`    public static Command pulse(double durationSeconds) {
+        return INSTANCE.pulse(durationSeconds);
+    }`
+        );
+      }
+
+      if (def.label === "WinchMechanism") {
+        helpers.push(
+`    public static Command extend() {
+        return INSTANCE.extend();
+    }`,
+`    public static Command retract() {
+        return INSTANCE.retract();
+    }`,
+`    public static Command runAtSpeed(double speed) {
+        return INSTANCE.runAtSpeed(speed);
+    }`,
+`    public static Command manualControl(DoubleSupplier speedSupplier) {
+        return INSTANCE.manualControl(speedSupplier);
+    }`,
+`    public static Command zero() {
+        return INSTANCE.zero();
+    }`
+        );
+      }
+
+      return helpers.join("\n\n");
+    }
+
+    function generatedClass(def, values) {
       const builderLines = collectBuilderLines(def, values)
         .map((line) => `        ${line}`)
         .join("\n");
-      return `${def.label} ${values.variableName || toVariableName(values.catalystName)} = new ${def.label}(
-    ${def.label}.Config.builder()
+      const className = toClassName(values.catalystName || def.catalystName);
+      const positionMethods = uniquePositionMethods(def);
+      const helpers = commandHelpers(def, positionMethods);
+
+      return `import edu.wpi.first.wpilibj2.command.Command;
+${extraImports(def)}import frc.lib.catalyst.mechanisms.${def.label};
+
+public final class ${className} {
+    private static final ${def.label} INSTANCE = new ${def.label}(
+        ${def.label}.Config.builder()
 ${builderLines}
-        .build());\n`;
+        .build());
+
+    private ${className}() {}
+
+    public static ${def.label} getInstance() {
+        return INSTANCE;
+    }
+
+${helpers}
+}\n`;
     }
 
     function generate() {
@@ -1683,7 +1940,7 @@ ${builderLines}
       const key = byId("mechanism").value;
       const def = definitions[key];
       const values = readValues();
-      byId("codeOutput").textContent = generatedInstance(def, values);
+      byId("codeOutput").textContent = generatedClass(def, values);
     }
 
     function initEvents() {
@@ -1696,7 +1953,7 @@ ${builderLines}
         openGainEstimator();
       });
       byId("catalystName").addEventListener("input", () => {
-        byId("variableName").value = toVariableName(byId("catalystName").value);
+        byId("variableName").value = toClassName(byId("catalystName").value);
         generate();
       });
 
@@ -1751,7 +2008,7 @@ ${builderLines}
 
       byId("downloadCode").addEventListener("click", () => {
         const values = readValues();
-        const filename = `${values.variableName || "mechanism"}-snippet.java`;
+        const filename = `${toClassName(values.catalystName || definitions[byId("mechanism").value].catalystName)}.java`;
         const blob = new Blob([byId("codeOutput").textContent], { type: "text/x-java-source" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
