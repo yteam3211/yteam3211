@@ -41,6 +41,7 @@
             links: [
                 ["Sensors", "Sensors/Sensors_Overview.html"],
                 ["Mechanisms", "Mechanisms/Mechanisms_Overview.html"],
+                ["Swerve", "Mechanisms/Swerve_Overview.html"],
                 ["Autonomous", "Auto/Autonomous_Overview.html"],
             ],
         },

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swerve Drive Overview</title>
+    <link rel="stylesheet" href="../course.css">
+    <script src="../sidebar.js" defer></script>
+</head>
+<body>
+<main>
+    <h1>Swerve Drive</h1>
+    <p>Swerve drive is a drivetrain where each wheel module can both drive forward/backward and rotate to any steering angle. This lets the robot translate in any direction while also rotating, which is why swerve is so powerful in FRC.</p>
+    <p>Swerve is also one of the easiest systems to make confusing. The mechanical side must be built accurately, and the code side must be very careful with units, angles, offsets, and coordinate frames.</p>
+    <p>On our team, the swerve code is based on the <strong>CTRE Phoenix 6 default/generated swerve format</strong>. That means we do not expect new programmers to write all the low-level swerve math from scratch. We expect them to understand what the generated code represents, how to configure it, and how to debug it safely.</p>
+
+    <div class="course-grid">
+        <section class="course-card">
+            <h3>Drive Motor</h3>
+            <p>Spins the wheel and controls how fast that module moves across the carpet.</p>
+        </section>
+        <section class="course-card">
+            <h3>Steer Motor</h3>
+            <p>Rotates the wheel pod so the module points in the requested direction.</p>
+        </section>
+        <section class="course-card">
+            <h3>Absolute Encoder</h3>
+            <p>Tells the code the real steering angle when the robot boots.</p>
+        </section>
+        <section class="course-card">
+            <h3>Gyro</h3>
+            <p>Measures robot heading so drivers can use field-relative control and autos can estimate pose.</p>
+        </section>
+    </div>
+
+    <hr>
+
+    <h2>Mechanical Side</h2>
+    <p>A swerve module is two mechanisms in one package. The wheel needs to spin, and the whole wheel assembly needs to turn. Good swerve code cannot hide bad mechanical assembly, so programmers should understand the hardware before tuning anything.</p>
+
+    <h3>1. Module Layout</h3>
+    <p>Each corner of the drivetrain has one swerve module. The code must know where each module is relative to the center of the robot.</p>
+    <ul>
+        <li><strong>Front left, front right, back left, back right:</strong> label modules clearly and keep the labels consistent in wiring, constants, code, and logs.</li>
+        <li><strong>Wheelbase and track width:</strong> measure the distance between module centers, not the frame edges.</li>
+        <li><strong>Center of rotation:</strong> normal driving rotates around the robot center, but advanced code can rotate around another point.</li>
+    </ul>
+
+    <h3>2. Drive System</h3>
+    <p>The drive motor sends power through gears or belts to the wheel. The important code number is the conversion from motor rotations to wheel distance.</p>
+    <ul>
+        <li><strong>Wheel diameter:</strong> affects meters per wheel rotation. Worn wheels can change this slightly.</li>
+        <li><strong>Drive gear ratio:</strong> converts motor rotations into wheel rotations.</li>
+        <li><strong>Traction:</strong> wheel material, robot weight, and carpet condition affect acceleration and slipping.</li>
+        <li><strong>Current limits:</strong> protect motors and reduce brownouts when all four modules accelerate hard.</li>
+    </ul>
+
+    <h3>3. Steering System</h3>
+    <p>The steer motor points the wheel. This system must be precise because even a small angle error can make the robot drift, fight itself, or rotate unexpectedly.</p>
+    <ul>
+        <li><strong>Steer gear ratio:</strong> converts motor rotations into module angle.</li>
+        <li><strong>Backlash:</strong> loose gears or belts can make the module angle lag behind the commanded angle.</li>
+        <li><strong>Absolute encoder offset:</strong> the encoder's zero rarely matches the wheel's real forward direction, so every module needs its own offset.</li>
+        <li><strong>Wheel alignment:</strong> all wheels should physically point the same direction when their code angle is zero.</li>
+    </ul>
+
+    <h3>4. CAN IDs And Wiring</h3>
+    <p>Swerve has many devices. A four-module robot usually has eight motor controllers plus four steering encoders, before counting the gyro.</p>
+    <ul>
+        <li>Write CAN IDs on the robot and in constants.</li>
+        <li>Keep drive motor, steer motor, and encoder IDs grouped by module.</li>
+        <li>Check that each module spins and steers from the correct corner before testing full drive code.</li>
+        <li>Use clear names in Phoenix Tuner, AdvantageScope, or dashboard logs so mistakes are obvious.</li>
+    </ul>
+
+    <h3>5. Mechanical Checks Before Code Tuning</h3>
+    <ol>
+        <li>Put the robot on blocks.</li>
+        <li>Command one module at a time.</li>
+        <li>Verify the correct wheel spins.</li>
+        <li>Verify positive drive direction is consistent across all modules.</li>
+        <li>Verify positive steer direction is consistent across all modules.</li>
+        <li>Set and record the absolute encoder offset for each module.</li>
+        <li>Only then start full drivetrain testing on carpet.</li>
+    </ol>
+
+    <hr>
+
+    <h2>Code Side</h2>
+    <p>Swerve code turns a desired robot motion into four wheel speeds and four wheel angles. The core idea is simple: drivers ask for chassis movement, kinematics converts that request into module states, and each module controls its own drive and steer motors.</p>
+    <p>For our robot, this is usually wrapped by CTRE's Phoenix 6 swerve API and the project generated from Tuner X. Students should learn the shape of that generated code first, then learn how the math works underneath it.</p>
+
+    <h3>1. Our CTRE-Based Format</h3>
+    <p>The CTRE generated swerve project gives us a working structure with constants, drivetrain code, module configs, telemetry hooks, simulation support, and command-based integration. The most important pieces to recognize are:</p>
+    <ul>
+        <li><strong><code>TunerConstants</code>:</strong> the generated constants file. This is where module IDs, encoder offsets, wheel locations, gearing, gains, and drivetrain constants usually live.</li>
+        <li><strong><code>CommandSwerveDrivetrain</code>:</strong> the subsystem-style drivetrain class used by command-based robot code.</li>
+        <li><strong><code>SwerveDrivetrainConstants</code>:</strong> robot-wide drivetrain settings, such as CAN bus name and Pigeon 2 ID.</li>
+        <li><strong><code>SwerveModuleConstants</code>:</strong> per-module settings for each wheel: drive motor, steer motor, CANcoder, offset, location, inversion, and module behavior.</li>
+        <li><strong>CTRE swerve requests:</strong> objects used to command the drivetrain, such as field-centric driving, robot-centric driving, braking, and pointing wheels.</li>
+    </ul>
+
+    <h3>2. What Students Still Need To Understand</h3>
+    <p>Generated code saves time, but it is not magic. If the constants are wrong, the robot will still drive wrong. Programmers should be able to explain what each generated value means and how it connects to the physical robot.</p>
+    <ul>
+        <li><strong>Module order:</strong> front-left, front-right, back-left, and back-right must match the real wiring.</li>
+        <li><strong>CAN IDs:</strong> every TalonFX, CANcoder, and Pigeon 2 ID must match the robot.</li>
+        <li><strong>Encoder offsets:</strong> every module needs the correct absolute encoder offset.</li>
+        <li><strong>Module positions:</strong> X and Y locations are measured from the robot center.</li>
+        <li><strong>Gains:</strong> steer and drive gains must be tuned for the real robot.</li>
+        <li><strong>Control request:</strong> teleop code should use the CTRE request object that matches the desired driving mode.</li>
+    </ul>
+
+    <h3>3. Important Types</h3>
+    <ul>
+        <li><code>ChassisSpeeds</code>: WPILib robot movement as vx, vy, and omega.</li>
+        <li><code>SwerveModuleState</code>: WPILib representation of one module's target wheel speed and target angle.</li>
+        <li><code>SwerveModulePosition</code>: WPILib representation of one module's traveled distance and current angle for pose tracking.</li>
+        <li><code>SwerveDrivetrain</code>: CTRE's drivetrain class that owns the Phoenix 6 swerve control and pose estimation behavior.</li>
+        <li><code>CommandSwerveDrivetrain</code>: the generated command-based wrapper we use in robot code.</li>
+    </ul>
+
+    <h3>4. Constants</h3>
+    <p>Swerve constants must be boring and correct. Most "swerve code bugs" are actually constants bugs. In our CTRE format, students should usually edit the generated constants instead of inventing a new constants layout.</p>
+    <pre><code>// Example shape, not complete robot code
+private static final int kPigeonId = 0;
+private static final String kCANBus = "rio";
+
+private static final int kFrontLeftDriveMotorId = 1;
+private static final int kFrontLeftSteerMotorId = 2;
+private static final int kFrontLeftEncoderId = 3;
+private static final double kFrontLeftEncoderOffset = 0.237;
+
+private static final double kFrontLeftXPosMeters = 0.31;
+private static final double kFrontLeftYPosMeters = 0.31;</code></pre>
+
+    <h3>5. Module Configuration</h3>
+    <p>In a fully custom swerve, you might write your own module class. In our CTRE format, module behavior is usually described through generated <code>SwerveModuleConstants</code> and CTRE owns most of the low-level module control.</p>
+    <ul>
+        <li><strong>Drive motor ID:</strong> the TalonFX that spins the wheel.</li>
+        <li><strong>Steer motor ID:</strong> the TalonFX that turns the module.</li>
+        <li><strong>Encoder ID:</strong> the CANcoder that reports the absolute steering angle.</li>
+        <li><strong>Encoder offset:</strong> the calibration value that makes "module zero" match the real wheel direction.</li>
+        <li><strong>X and Y position:</strong> the module's location from the robot center, in meters.</li>
+        <li><strong>Inversions:</strong> drive and steer direction settings that must match the real wiring and gearing.</li>
+    </ul>
+
+    <h3>6. Teleop Driving With Requests</h3>
+    <p>Instead of manually calling <code>setDesiredState</code> on each module during teleop, our CTRE-based format usually creates a drive request and passes it to the drivetrain.</p>
+    <pre><code>// Example idea, names may differ in the generated project
+private final SwerveRequest.FieldCentric driveRequest =
+    new SwerveRequest.FieldCentric()
+        .withDeadband(kMaxSpeed * 0.1)
+        .withRotationalDeadband(kMaxAngularRate * 0.1);
+
+drive.applyRequest(() -> driveRequest
+    .withVelocityX(-driverController.getLeftY() * kMaxSpeed)
+    .withVelocityY(-driverController.getLeftX() * kMaxSpeed)
+    .withRotationalRate(-driverController.getRightX() * kMaxAngularRate)
+);</code></pre>
+    <p>This is still the same idea as normal swerve: joystick input becomes desired chassis movement. CTRE's API handles the module-level control path.</p>
+
+    <h3>7. Field-Relative Driving</h3>
+    <p>In robot-relative driving, pushing the joystick forward means "drive toward the robot's front." In field-relative driving, pushing forward means "drive away from the driver station" no matter which way the robot is facing.</p>
+    <p>The CTRE field-centric request uses the drivetrain's heading information to do this. Field-relative driving is easier for drivers, but only if the gyro direction, operator perspective, and zero heading are correct.</p>
+
+    <h3>8. Drivetrain Subsystem Flow</h3>
+    <ol>
+        <li>Read joystick x, y, and rotation.</li>
+        <li>Apply deadband and speed scaling.</li>
+        <li>Choose a CTRE request type, usually field-centric for driver control.</li>
+        <li>Apply the request to <code>CommandSwerveDrivetrain</code>.</li>
+        <li>Let CTRE's swerve API handle module states, optimization, and closed-loop control.</li>
+        <li>Use the drivetrain pose estimate for autonomous, logging, and driver assist.</li>
+    </ol>
+
+    <h3>9. Odometry And Pose</h3>
+    <p>Pose estimation tracks the robot pose by combining gyro heading and module movement. In CTRE's Phoenix 6 swerve API, the drivetrain includes built-in pose estimation behavior, which is required for autonomous path following and useful for driver assist features.</p>
+    <ul>
+        <li><strong>Gyro:</strong> provides robot heading.</li>
+        <li><strong>Module positions:</strong> provide how far each wheel traveled and what direction it pointed.</li>
+        <li><strong>Reset pose:</strong> autonomous must start from the same pose the code believes.</li>
+        <li><strong>Vision:</strong> later, AprilTags can help correct drift, but basic drivetrain pose should work first.</li>
+    </ul>
+
+    <h3>10. Common Swerve Bugs</h3>
+    <ul>
+        <li><strong>Wrong module order:</strong> front-left code controls the front-right hardware.</li>
+        <li><strong>Bad absolute offsets:</strong> modules point slightly wrong even when the code looks right.</li>
+        <li><strong>Gyro sign reversed:</strong> field-relative drive rotates the controls the wrong way.</li>
+        <li><strong>Mixed units:</strong> rotations, radians, degrees, meters, and meters per second get mixed together.</li>
+        <li><strong>Wrong generated constants:</strong> a Tuner X project can only be correct if the robot measurements and IDs entered into it are correct.</li>
+        <li><strong>Skipping module tests:</strong> trying to debug all four modules at once makes simple mistakes hard to see.</li>
+    </ul>
+
+    <section class="note">
+        <h3>What To Edit First</h3>
+        <p>When using the team swerve format, start with the generated constants and drivetrain request code. Do not rewrite the CTRE swerve internals unless the software lead has a specific reason.</p>
+    </section>
+
+    <section class="mission">
+        <h3>Mission 1</h3>
+        <p>Make a CTRE swerve constants table for a robot. Include Pigeon ID, CAN bus, module name, drive motor ID, steer motor ID, encoder ID, encoder offset, X position, Y position, wheel diameter, drive gear ratio, and steer gear ratio.</p>
+    </section>
+
+    <section class="mission">
+        <h3>Mission 2</h3>
+        <p>Read a generated <code>CommandSwerveDrivetrain</code> and <code>TunerConstants</code> file. Mark which lines describe hardware, which lines describe tuning, and which lines are used by driver controls.</p>
+    </section>
+
+    <section class="note">
+        <h3>Rule Of Thumb</h3>
+        <p>When debugging swerve, isolate first. Test the generated constants, one module, then four modules on blocks, then slow robot-centric driving, then field-centric driving, then pose estimation, then autonomous.</p>
+    </section>
+
+    <section class="note">
+        <h3>Reference</h3>
+        <p>Use the official CTRE Phoenix 6 <a href="https://v6.docs.ctr-electronics.com/en/latest/docs/api-reference/mechanisms/swerve/swerve-overview.html" target="_blank">Swerve Overview</a>, <a href="https://v6.docs.ctr-electronics.com/en/latest/docs/api-reference/mechanisms/swerve/swerve-builder-api.html" target="_blank">Swerve Builder API</a>, and <a href="https://v6.docs.ctr-electronics.com/en/latest/docs/tuner/tuner-swerve/index.html" target="_blank">Tuner X Swerve Project Generator</a> docs when working on the real robot.</p>
+    </section>
+
+    <div class="nav-links">
+        <a href="Mechanisms_Overview.html">Previous: Mechanisms</a>
+        <a href="../Auto/Autonomous_Overview.html">Next: Autonomous</a>
+    </div>
+</main>
+</body>
+</html>
