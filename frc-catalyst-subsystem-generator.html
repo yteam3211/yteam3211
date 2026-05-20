@@ -50,6 +50,14 @@
       padding: 24px 0;
     }
 
+    body.yteam-sidebar-ready .app {
+      width: min(1440px, calc(100vw - var(--yteam-sidebar-width) - 60px));
+    }
+
+    body.yteam-sidebar-ready.yteam-sidebar-collapsed .app {
+      width: min(1440px, calc(100vw - 32px));
+    }
+
     header {
       display: flex;
       justify-content: space-between;
@@ -488,6 +496,11 @@
         padding: 12px 0;
       }
 
+      body.yteam-sidebar-ready .app,
+      body.yteam-sidebar-ready.yteam-sidebar-collapsed .app {
+        width: min(100vw - 20px, 1440px);
+      }
+
       header,
       .panel-title {
         align-items: flex-start;
@@ -506,6 +519,7 @@
       }
     }
   </style>
+  <script src="sidebar.js" defer></script>
 </head>
 <body>
   <main class="app">
